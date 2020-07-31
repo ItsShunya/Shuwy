@@ -15,6 +15,7 @@ def embed_welcome(message, member):
 
 def embed_error(message, **kwargs):
     '''Sets the embed message specifically for error messages.'''
+
     input1 = kwargs.get('input1')
     input2 = kwargs.get('input2')
     input3 = kwargs.get('input3')
@@ -25,6 +26,7 @@ def embed_error(message, **kwargs):
 def set_style(embed):
     '''Sets the style used for any kind of embed messages
        To be used in ALL embeds so they are displayed with the same style (thumbnail, footer, timestamp).'''
+
     embed.set_thumbnail(url='https://i.imgur.com/NYsLYRr.jpg')
     embed.set_footer(text = 'Developer/Owner: Shunya#1624 ', icon_url = 'https://yt3.ggpht.com/a/AATXAJwhPDl8XMKJJmXiBj-bsQFBDfEFluin0ywkZ66M=s100-c-k-c0xffffffff-no-rj-mo')
     embed.timestamp = datetime.datetime.utcnow()
