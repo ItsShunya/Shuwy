@@ -33,12 +33,17 @@ def logger():
 
     logs = {'discord': None, 'wavelink': None, 'bot': None}
 
+    if not os.path.exists('logs/lavalink'): # This one is for the Lavalink server
+            os.makedirs('logs/lavalink')
+
     for log_name in logs.keys():
         log = logging.getLogger(log_name)
         # We only need one handler for all the logs.
-        handler = logging.handlers.RotatingFileHandler(filename=f'logs/{log_name}.log', mode='w', backupCount=5, encoding='utf-8', maxBytes=2**22)
+        if not os.path.exists(f'logs/{log_name}'):
+            os.makedirs(f'logs/{log_name}')
+        handler = logging.handlers.RotatingFileHandler(filename=f'logs/{log_name}/{log_name}.log', mode='w', backupCount=5, encoding='utf-8', maxBytes=2**22)
         handler.setFormatter(logging.Formatter('%(asctime)s %(name)s: %(levelname)s: %(message)s', datefmt='%d/%m/%Y %H:%M:%S'))
-        if os.path.isfile(f'logs/{log_name}.log'):
+        if os.path.isfile(f'logs/{log_name}/{log_name}.log'):
             handler.doRollover()
         log.addHandler(handler)
 
@@ -76,7 +81,7 @@ description = '''Shuwy bot implements functions for moderation, music and member
 bot = commands.Bot(command_prefix=get_prefix, owner_id=125345019199488000, case_insensitive=True, description=description)
 bot.remove_command('help')
 
-bot.version = '0.0.6'
+bot.version = '0.0.7'
 bot.color = 0xebb145
 bot.log =logging.getLogger('bot')
 

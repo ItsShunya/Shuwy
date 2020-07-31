@@ -37,10 +37,11 @@ sentry:
 #    another_key: another_value
 
 logging:
-  file:
+  file: 
     max-history: 30
     max-size: 1GB
-  path: ./logs/
+
+  path: ../logs/lavalink/
 
   level:
     root: INFO
