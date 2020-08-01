@@ -203,6 +203,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u23F8')
     async def pause_command(self, payload: discord.RawReactionActionEvent):
@@ -214,6 +215,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u23F9')
     async def stop_command(self, payload: discord.RawReactionActionEvent):
@@ -224,7 +226,7 @@ class InteractiveController(menus.Menu):
         command = self.bot.get_command('stop')
         ctx.command = command
 
-        await self.bot.invoke(ctx)
+        await self.bot.invoke(ctx) 
 
     @menus.button(emoji='\u23ED')
     async def skip_command(self, payload: discord.RawReactionActionEvent):
@@ -236,6 +238,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\U0001F500')
     async def shuffle_command(self, payload: discord.RawReactionActionEvent):
@@ -247,6 +250,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u2795')
     async def volup_command(self, payload: discord.RawReactionActionEvent):
@@ -258,6 +262,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u2796')
     async def voldown_command(self, payload: discord.RawReactionActionEvent):
@@ -269,6 +274,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\U0001F1F6')
     async def queue_command(self, payload: discord.RawReactionActionEvent):
@@ -280,7 +286,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
-
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
 class PaginatorSource(menus.ListPageSource):
     '''Player queue paginator class.'''
@@ -299,7 +305,7 @@ class PaginatorSource(menus.ListPageSource):
         return True
 
 
-class MusicCog(commands.Cog, wavelink.WavelinkMixin):
+class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
     '''Music Cog.'''
 
     def __init__(self, bot: commands.Bot):
