@@ -10,7 +10,7 @@ import platform
 import dotenv
 import discord
 
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 from datetime import datetime
 from discord.ext import commands
 from utilities.embeds import embed_error, set_style
