@@ -16,7 +16,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @commands.command(name='joined', aliases=['unido', 'entered'])
     async def joined(self, ctx, *, member: discord.Member=None):
-        '''Says when a member joined.
+        '''Says when a member joined the server.
 
         Keyword arguments:
         member -- member object that we want to check  '''
@@ -28,7 +28,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @commands.command(name='top_role', aliases=['toprole', 'top_rol', 'toprol'])
     async def show_toprole(self, ctx, *, member: discord.Member=None):
-        '''Simple command which shows the members Top Role.
+        '''Shows the members most important role.
         
         Keyword arguments:
         member -- member object that we want to check  '''
@@ -40,7 +40,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @commands.command(name='perms', aliases=['perms_for', 'permissions'])
     async def check_permissions(self, ctx, *, member: discord.Member=None):
-        '''A simple command which checks a members Guild Permissions.
+        '''A simple command which checks a members permissions.
         If member is not provided, the author will be checked.
         
         Keyword arguments:
@@ -59,7 +59,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @commands.group(invoke_without_commands=True)
     async def welcome(self, ctx):
-        '''Command to set the preferences for the welcome channel/message/role.
+        '''Sets the preferences for the welcome channel/message/role.
            Needs to be used together with one of its subcommands.'''
 
         if ctx.invoked_subcommand is None:
@@ -68,7 +68,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def channel(self, ctx, channel:discord.TextChannel):
-        '''Subcommand for "welcome" function to set the welcome channel.
+        '''Subcommand to set the welcome channel.
         
         Keyword arguments:
         channel -- channel to be used for welcome messages'''
@@ -90,7 +90,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def text(self, ctx, *, text):
-        '''Subcommand for "welcome" function to set the welcome message.
+        '''Subcommand to set the welcome message.
         
         Keyword arguments:
         text -- message to be used as welcome messages'''
@@ -113,7 +113,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def role(self, ctx, role:discord.Role):
-        '''Subcommand for "welcome" function to set the welcome role.
+        '''Subcommand to set the welcome role.
         
         Keyword arguments:
         role -- role to be set to new server members'''
@@ -133,7 +133,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def channel_on(self, ctx):
-        '''Subcommand for "welcome" function to activate the welcome message.'''
+        '''Subcommand to activate the welcome message.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
@@ -147,7 +147,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def channel_off(self, ctx):
-        '''Subcommand for "welcome" function to deactivate the welcome message.'''
+        '''Subcommand to deactivate the welcome message.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
@@ -161,7 +161,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def role_on(self, ctx):
-        '''Subcommand for "welcome" function to activate the welcome role.'''
+        '''Subcommand to activate the welcome role.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
@@ -175,7 +175,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def role_off(self, ctx):
-        '''Subcommand for "welcome" function to deactivate the welcome role.'''
+        '''Subcommand to deactivate the welcome role.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
