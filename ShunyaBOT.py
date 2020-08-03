@@ -77,9 +77,8 @@ def get_prefix(bot, message):
     # If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
-description = '''Shuwy bot implements functions for moderation, music and members.'''
+description = '''Shuwy is a bot written by `Shunya#1624`. It implements basic moderation functions, automation and music.'''
 bot = commands.Bot(command_prefix=get_prefix, owner_id=125345019199488000, case_insensitive=True, description=description)
-bot.remove_command('help')
 
 bot.version = '0.0.7'
 bot.color = 0xebb145
