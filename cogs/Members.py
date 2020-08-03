@@ -24,7 +24,7 @@ class MembersCog(commands.Cog, name='Members'):
 
         if member is None:
             member = ctx.author
-        embed = discord.Embed(color=0xebb145, description=f'{member.display_name} joined on {member.joined_at}')
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'{member.display_name} joined on {member.joined_at}')
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='top_role', aliases=['toprole', 'top_rol', 'toprol'])
@@ -37,7 +37,7 @@ class MembersCog(commands.Cog, name='Members'):
 
         if member is None:
             member = ctx.author
-        embed = discord.Embed(color=0xebb145, description=f'The top role for {member.display_name} is {member.top_role.name}')
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'The top role for {member.display_name} is {member.top_role.name}')
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='perms', aliases=['perms_for', 'permissions'])
@@ -67,7 +67,7 @@ class MembersCog(commands.Cog, name='Members'):
            Needs to be used together with one of its subcommands.'''
 
         if ctx.invoked_subcommand is None:
-            embed = discord.Embed(color=0xebb145, title='Available Commands:', description='welcome channel <#channel>\nwelcome text <message>\nwelcome role <@role>\nwelcome channel_on\nwelcome channel_off\nwelcome role_on\nwelcome role_off')
+            embed = discord.Embed(color=discord.Colour.purple(), title='Available Commands:', description='welcome channel <#channel>\nwelcome text <message>\nwelcome role <@role>\nwelcome channel_on\nwelcome channel_off\nwelcome role_on\nwelcome role_off')
             await ctx.send(embed=set_style(embed))
 
     @welcome.command()
@@ -366,7 +366,7 @@ class MembersCog(commands.Cog, name='Members'):
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
             elif str(messageid) in str(result[2]):
                 cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emm}'")
-                embed = discord.Embed(description='Reaction has been removed.', color=0xffd500)  
+                embed = discord.Embed(description='Reaction has been removed.', color=discord.Colour.purple())  
                 await ctx.send(embed=set_style(embed))
             else:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
@@ -375,7 +375,7 @@ class MembersCog(commands.Cog, name='Members'):
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
             elif str(messageid) in str(result[2]):
                 cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emoji}'")
-                embed = discord.Embed(description='Reaction has been removed.', color=0xffd500)  
+                embed = discord.Embed(description='Reaction has been removed.', color=discord.Colour.purple())  
                 await ctx.send(embed=set_style(embed))
             else:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))

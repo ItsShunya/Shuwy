@@ -23,7 +23,7 @@ class ModerationCog(commands.Cog, name='Moderation'):
                 await ctx.send(embed=embed_error(message, input1=ctx))
             else:
                 deleted = await ctx.message.channel.purge(limit=number)
-                embed = discord.Embed(title=f'Purge has been completed by {ctx.message.author.mention}', description=f'{len(deleted)} messages have been deleted.', color=0xffd500)
+                embed = discord.Embed(title=f'Purge has been completed by {ctx.message.author.mention}', description=f'{len(deleted)} messages have been deleted.', color=discord.Colour.purple())
                 await ctx.send(embed=set_style(embed))
         except:
             message = 'I cannot purge messages here.'
@@ -44,7 +44,7 @@ class ModerationCog(commands.Cog, name='Moderation'):
             await ctx.send(embed=embed_error(message, input1=ctx))
         else:
             await ctx.guild.kick(user=user, reason=reason)
-            embed = discord.Embed(title=f'{user} has been kicked by {ctx.message.author}', description=f'Reason: {reason}.', color=0xffd500)
+            embed = discord.Embed(title=f'{user} has been kicked by {ctx.message.author}', description=f'Reason: {reason}.', color=discord.Colour.purple())
             await ctx.send(embed=set_style(embed))
     
     @commands.command()
@@ -62,7 +62,7 @@ class ModerationCog(commands.Cog, name='Moderation'):
             await ctx.send(embed=embed_error(message, input1=ctx))
         else:
             await ctx.guild.ban(user=user, reason=reason)
-            embed = discord.Embed(title=f'{user} has been banned by {ctx.message.author}', description=f'Reason: {reason}.', color=0xebb145)
+            embed = discord.Embed(title=f'{user} has been banned by {ctx.message.author}', description=f'Reason: {reason}.', color=discord.Colour.purple())
             await ctx.send(embed=set_style(embed))
 
     @commands.command()
@@ -76,7 +76,7 @@ class ModerationCog(commands.Cog, name='Moderation'):
         reason -- message to be displayed as reason for the unban'''
 
         await ctx.guild.unban(user=user, reason=reason)
-        embed = discord.Embed(title=f'{user} has been unbanned by {ctx.message.author}', description=f'Reason: {reason}.', color=0xebb145)
+        embed = discord.Embed(title=f'{user} has been unbanned by {ctx.message.author}', description=f'Reason: {reason}.', color=discord.Colour.purple())
         await ctx.send(embed=set_style(embed))
 
     @commands.command()
@@ -90,7 +90,7 @@ class ModerationCog(commands.Cog, name='Moderation'):
         if member is None:
             member = ctx.author
         roles = [role for role in member.roles]
-        embed = discord.Embed(color=0xffd500)
+        embed = discord.Embed(color=discord.Colour.purple())
         embed.set_author(name=f'User Info - {member}')
         embed.add_field(name='ID:', value=member.id)
         embed.add_field(name='Server name:', value=member.display_name)

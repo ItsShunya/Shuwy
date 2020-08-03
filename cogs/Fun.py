@@ -11,13 +11,13 @@ class FunCog(commands.Cog, name='Fun'):
     @commands.command()
     async def ping(self, ctx):
         '''Ping-Pong.'''
-        embed = discord.Embed(description='Pong!', color=0xebb145)
+        embed = discord.Embed(description='Pong!', color=discord.Colour.purple())
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='coolbot', aliases=['cool', 'dope', 'nice'])
     async def cool_bot(self, ctx):
         '''Is the bot cool?'''
-        embed = discord.Embed(color=0xebb145, description='This bot is cool. :)')
+        embed = discord.Embed(color=discord.Colour.purple(), description='This bot is cool. :)')
         await ctx.send(embed=set_style(embed))
 
 def setup(bot):

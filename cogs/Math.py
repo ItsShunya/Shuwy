@@ -13,7 +13,7 @@ class MathCog(commands.Cog, name='Math'):
         '''A simple command which does addition on two integer values.'''
 
         total = first + second
-        embed = discord.Embed(title=f'Hello, @**{ctx.author.name}**!', description=f'The sum of **{first}** and **{second}**  is  **{total}**.', color=0xebb145)  
+        embed = discord.Embed(title=f'Hello, @**{ctx.author.name}**!', description=f'The sum of **{first}** and **{second}**  is  **{total}**.', color=discord.Colour.purple())  
         await ctx.send(embed=set_style(embed))
 
 

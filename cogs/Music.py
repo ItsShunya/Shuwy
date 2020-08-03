@@ -117,7 +117,7 @@ class Player(wavelink.Player):
         channel = self.bot.get_channel(int(self.channel_id))
         qsize = self.queue.qsize()
 
-        embed = discord.Embed(title=f'Music Controller | {channel.name}', colour=0xebb145)
+        embed = discord.Embed(title=f'Music Controller | {channel.name}', colour=discord.Colour.purple())
         embed.description = f'Now Playing:\n**`{track.title}`**\n\n'
         embed.set_thumbnail(url=track.thumb)
 
@@ -295,7 +295,7 @@ class PaginatorSource(menus.ListPageSource):
         super().__init__(entries, per_page=per_page)
 
     async def format_page(self, menu: menus.Menu, page):
-        embed = discord.Embed(title='Coming Up...', colour=0x4f0321)
+        embed = discord.Embed(title='Coming Up...', colour=discord.Colour.purple())
         embed.description = '\n'.join(f'`{index}. {title}`' for index, title in enumerate(page, 1))
 
         return embed
@@ -384,7 +384,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
     async def cog_check(self, ctx: commands.Context):
         '''Cog wide check, which disallows commands in DMs.'''
 
-        if not ctx.guild:
+        if not ctx.guild and '!help' not in ctx.message.content:
             await ctx.send('Music commands are not available in Private Messages.')
             return False
         
