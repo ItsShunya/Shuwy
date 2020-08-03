@@ -1,6 +1,7 @@
 import discord
 import os
 import platform
+import asyncio
 from discord.ext import commands
 from utilities.embeds import embed_error, set_style
 
@@ -34,7 +35,7 @@ class HelpCommand(commands.HelpCommand):
         while 1:
             try:
                 reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
-            except TimeoutError:  # session has timed out
+            except asyncio.TimeoutError:  # session has timed out
                 try:
                     await help_embed.clear_reactions()
                 except discord.errors.Forbidden:
