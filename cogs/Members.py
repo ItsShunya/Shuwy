@@ -15,7 +15,6 @@ class MembersCog(commands.Cog, name='Members'):
         self.bot = bot
 
     @commands.command(name='joined', aliases=['unido', 'entered'])
-    @commands.guild_only()
     async def joined(self, ctx, *, member: discord.Member=None):
         '''Says when a member joined.
 
@@ -28,7 +27,6 @@ class MembersCog(commands.Cog, name='Members'):
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='top_role', aliases=['toprole', 'top_rol', 'toprol'])
-    @commands.guild_only()
     async def show_toprole(self, ctx, *, member: discord.Member=None):
         '''Simple command which shows the members Top Role.
         
@@ -41,7 +39,6 @@ class MembersCog(commands.Cog, name='Members'):
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='perms', aliases=['perms_for', 'permissions'])
-    @commands.guild_only()
     async def check_permissions(self, ctx, *, member: discord.Member=None):
         '''A simple command which checks a members Guild Permissions.
         If member is not provided, the author will be checked.
@@ -61,7 +58,6 @@ class MembersCog(commands.Cog, name='Members'):
         await ctx.send(content=None, embed=set_style(embed))
 
     @commands.group(invoke_without_commands=True)
-    @commands.guild_only()
     async def welcome(self, ctx):
         '''Command to set the preferences for the welcome channel/message/role.
            Needs to be used together with one of its subcommands.'''
@@ -251,7 +247,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.Cog.listener()
-    @commands.guild_only()
     async def on_raw_reaction_add(self, reaction):
         '''Event that takes places when a reaction is added to a message.'''
 
@@ -282,7 +277,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.Cog.listener()
-    @commands.guild_only()
     async def on_raw_reaction_remove(self, reaction):
         '''Event that takes places when a reaction is deleted from a message.'''
 
@@ -313,7 +307,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.command()
-    @commands.guild_only()
     async def role_add(self, ctx, channel:discord.TextChannel, messageid, emoji, role:discord.Role):
         '''Sets a role to be added to a user when he reacts to a pre-defined message with a pre-defined role.
 
@@ -348,7 +341,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.command()
-    @commands.guild_only()
     async def role_remove(self, ctx, messageid=None, emoji=None):
         '''Use it after using role_add to make the bot remove the emoji and stop adding the role to the person reacting to it.
 
@@ -382,6 +374,15 @@ class MembersCog(commands.Cog, name='Members'):
         database.commit()
         cursor.close()
         database.close()
+
+    async def cog_check(self, ctx: commands.Context):
+        '''Cog wide check, which disallows commands in DMs.'''
+
+        if not ctx.guild and '!help' not in ctx.message.content:
+            await ctx.send('Member related commands are not available in Private Messages!')
+            return False
+        
+        return True
 
 def setup(bot):
     bot.add_cog(MembersCog(bot))
