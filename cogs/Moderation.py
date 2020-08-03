@@ -9,7 +9,6 @@ class ModerationCog(commands.Cog, name='Moderation'):
         self.bot = bot
 
     @commands.command()
-    @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, *, number:int=None):
         '''Deletes the amount of messages introduced as parameter
@@ -30,7 +29,6 @@ class ModerationCog(commands.Cog, name='Moderation'):
             await ctx.send(embed=embed_error(message, input1=ctx))
 
     @commands.command()
-    @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, user: discord.Member, *, reason='None'):
         '''Kicks the specified user from the current server.
@@ -48,7 +46,6 @@ class ModerationCog(commands.Cog, name='Moderation'):
             await ctx.send(embed=set_style(embed))
     
     @commands.command()
-    @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, user: discord.Member, *, reason='None'):
         '''Bans the specified user from the current server.
@@ -66,7 +63,6 @@ class ModerationCog(commands.Cog, name='Moderation'):
             await ctx.send(embed=set_style(embed))
 
     @commands.command()
-    @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, user: discord.Member, *, reason='None'):
         '''Unbans the specified user from the current server.
@@ -80,7 +76,6 @@ class ModerationCog(commands.Cog, name='Moderation'):
         await ctx.send(embed=set_style(embed))
 
     @commands.command()
-    @commands.guild_only()
     async def userinfo(self, ctx, *, member: discord.Member=None):
         '''Tells all the information about an user.
 
@@ -100,6 +95,15 @@ class ModerationCog(commands.Cog, name='Moderation'):
         embed.add_field(name='Top role:', value=member.top_role.mention)
         embed.add_field(name='Bot?', value=member.bot)
         await ctx.send(embed=set_style(embed))
+
+    async def cog_check(self, ctx: commands.Context):
+        '''Cog wide check, which disallows commands in DMs.'''
+
+        if not ctx.guild and '!help' not in ctx.message.content:
+            await ctx.send('Moderation commands are not available in Private Messages!')
+            return False
+        
+        return True
 
 def setup(bot):
     bot.add_cog(ModerationCog(bot))
