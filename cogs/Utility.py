@@ -58,7 +58,7 @@ class HelpCommand(commands.HelpCommand):
 
                 elif str(reaction.emoji) == '◀':  # go to the previous page
                     page -= 1
-                    if page is -1 or -2:  # check whether to go to the final page
+                    if page is -2:  # check whether to go to the final page
                         page = len(cogs) - 1
                     embed = await self.bot_help_paginator(page, cogs)
                     await help_embed.edit(embed=embed)
@@ -91,7 +91,7 @@ class HelpCommand(commands.HelpCommand):
         if (page == -1):
             return set_style(self.get_information_page())
 
-        embed = discord.Embed(title=f'{bot.user.name} | Help with {cog.qualified_name} Cog ({len(all_commands)} commands) :gear:',
+        embed = discord.Embed(title=f'{bot.user.name} | Help with {cog.qualified_name} Cog ({len(all_commands)} commands)    :gear:',
                               description=cog.description, color=discord.Colour.purple())
         embed.set_author(name=f'Page {page + 1}/{len(cogs)}', icon_url=ctx.bot.user.avatar_url)
         for c in cog.walk_commands():
@@ -135,6 +135,13 @@ class HelpCommand(commands.HelpCommand):
         else:
             return command.short_doc
 
+    def get_command_longer_description(self, command):
+        """Method to return a commands longer doc"""
+        if not command.__doc__:  # check if it has any brief
+            return 'There is no documentation for this command currently'
+        else:
+            return command__doc__
+
     def get_command_help(self, command):
         """Method to return a commands full description/doc string"""
         if not command.help:  # check if it has any brief or doc string
@@ -146,7 +153,7 @@ class HelpCommand(commands.HelpCommand):
         ctx = self.context
         bot = ctx.bot
 
-        embed = discord.Embed(title=f'{bot.user.name} | Help :gear:', description=bot.description, color=discord.Colour.purple())
+        embed = discord.Embed(title=f'{bot.user.name} | Help    :gear:', description=bot.description, color=discord.Colour.purple())
         embed.add_field(name=f':information_source:  In this page you will find help for any command',
                         value=f'Use `"{self.clean_prefix}help <command>"` for more info on a command.\n\n'
                               '`<...>` indicates a required argument.\n`[...]` indicates an optional argument.\n\n')
@@ -168,7 +175,7 @@ class HelpCommand(commands.HelpCommand):
         def check(reaction, user):  # check who is reacting to the message
             return user == ctx.author
 
-        embed = await self.bot_help_cog__paginator(page, cog)
+        embed = await self.bot_help_cog_paginator(page, cog)
         help_embed = await ctx.send(embed=embed)  # sends the first help page
 
         reactions = ('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}',
@@ -183,7 +190,7 @@ class HelpCommand(commands.HelpCommand):
         while 1:
             try:
                 reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
-            except TimeoutError:  # session has timed out
+            except asyncio.TimeoutError:  # session has timed out
                 try:
                     await help_embed.clear_reactions()
                 except discord.errors.Forbidden:
@@ -196,25 +203,25 @@ class HelpCommand(commands.HelpCommand):
                     pass
 
                 if str(reaction.emoji) == '⏭':  # go to the last the page
-                    page = len(cogs) - 1
-                    embed = await self.bot_help_paginator(page, cogs)
+                    page = 0
+                    embed = await self.bot_help_cog_paginator(page, cog)
                     await help_embed.edit(embed=embed)
                 elif str(reaction.emoji) == '⏮':  # go to the first page
-                    page = 0
-                    embed = await self.bot_help_paginator(page, cogs)
+                    page = -1
+                    embed = await self.bot_help_cog_paginator(page, cog)
                     await help_embed.edit(embed=embed)
 
                 elif str(reaction.emoji) == '◀':  # go to the previous page
                     page -= 1
-                    if page == -1:  # check whether to go to the final page
-                        page = len(cogs) - 1
-                    embed = await self.bot_help_paginator(page, cogs)
+                    if page == -2:  # check whether to go to the final page
+                        page = 0
+                    embed = await self.bot_help_cog_paginator(page, cog)
                     await help_embed.edit(embed=embed)
                 elif str(reaction.emoji) == '▶':  # go to the next page
                     page += 1
-                    if page == len(cogs):  # check whether to go to the first page
-                        page = 0
-                    embed = await self.bot_help_paginator(page, cogs)
+                    if page == 1:  # check whether to go to the first page
+                        page = -1
+                    embed = await self.bot_help_cog_paginator(page, cog)
                     await help_embed.edit(embed=embed)
 
                 elif str(reaction.emoji) == 'ℹ':  # show information help
@@ -228,15 +235,14 @@ class HelpCommand(commands.HelpCommand):
     async def bot_help_cog_paginator(self, page: int, cog):
         ctx = self.context
         bot = ctx.bot
-        cog = bot.get_cog(cogs[page])  # get the current cog
-        all_commands = [command for command in bot.get_cog(cogs[page]).get_commands()]  # filter the commands the user can use
+        all_commands = [command for command in cog.get_commands()]  # filter the commands the user can use
 
         if (page == -1):
             return set_style(self.get_information_page())
 
-        embed = discord.Embed(title=f'{bot.user.name} | Help with {cog.qualified_name} Cog ({len(all_commands)} commands) :gear:',
+        embed = discord.Embed(title=f'{bot.user.name} | Help with {cog.qualified_name} Cog ({len(all_commands)} commands)    :gear:',
                               description=cog.description, color=discord.Colour.purple())
-        embed.set_author(name=f'Page {page + 1}/{len(cogs)}', icon_url=ctx.bot.user.avatar_url)
+        embed.set_author(name=f'Page {page + 1}/{1}', icon_url=ctx.bot.user.avatar_url)
         for c in cog.walk_commands():
             try:
                 result = await c.can_run(ctx)
@@ -254,10 +260,184 @@ class HelpCommand(commands.HelpCommand):
         return embed
 
     async def send_group_help(self, group):
+        ctx = self.context
+        bot = ctx.bot
+        page = -1
+        def check(reaction, user):  # check who is reacting to the message
+            return user == ctx.author
+
+        embed = await self.bot_help_command_paginator(page, group)
+        help_embed = await ctx.send(embed=embed)  # sends the first help page
+
+        reactions = ('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}',
+                     '\N{BLACK LEFT-POINTING TRIANGLE}',
+                     '\N{BLACK RIGHT-POINTING TRIANGLE}',
+                     '\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}',
+                     '\N{BLACK SQUARE FOR STOP}',
+                     '\N{INFORMATION SOURCE}')  # add reactions to the message
+        bot.loop.create_task(self.bot_help_paginator_reactor(help_embed, reactions))
+        # this allows the bot to carry on setting up the help command
+
+        while 1:
+            try:
+                reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
+            except asyncio.TimeoutError:  # session has timed out
+                try:
+                    await help_embed.clear_reactions()
+                except discord.errors.Forbidden:
+                    pass
+                break
+            else:
+                try:
+                    await help_embed.remove_reaction(str(reaction.emoji), ctx.author)  # remove the reaction 
+                except discord.errors.Forbidden:
+                    pass
+
+                if str(reaction.emoji) == '⏭':  # go to the last the page
+                    page = 0
+                    embed = await self.bot_help_group_paginator(page, group)
+                    await help_embed.edit(embed=embed)
+                elif str(reaction.emoji) == '⏮':  # go to the first page
+                    page = -1
+                    embed = await self.bot_help_group_paginator(page, group)
+                    await help_embed.edit(embed=embed)
+
+                elif str(reaction.emoji) == '◀':  # go to the previous page
+                    page -= 1
+                    if page == -2:  # check whether to go to the final page
+                        page = 0
+                    embed = await self.bot_help_group_paginator(page, group)
+                    await help_embed.edit(embed=embed)
+                elif str(reaction.emoji) == '▶':  # go to the next page
+                    page += 1
+                    if page == 1:  # check whether to go to the first page
+                        page = -1
+                    embed = await self.bot_help_group_paginator(page, group)
+                    await help_embed.edit(embed=embed)
+
+                elif str(reaction.emoji) == 'ℹ':  # show information help
+                    embed = self.get_information_page()
+                    await help_embed.edit(embed=set_style(embed))
+
+                elif str(reaction.emoji) == '⏹':  # delete the message and break from the wait_for
+                    await help_embed.delete()
+                    break
         return
 
-    async def send_command_help(send, command):
-        return
+    async def bot_help_group_paginator(self, page: int, group):
+        ctx = self.context
+        bot = ctx.bot
+
+        if (page == -1):
+            return set_style(self.get_information_page())
+
+        embed = discord.Embed(title=f'{bot.user.name} | Help with {self.clean_prefix}{group} commands    :gear:',
+                              description=' ', color=discord.Colour.purple())
+        embed.set_author(name=f'Page {page + 1}/{1}', icon_url=ctx.bot.user.avatar_url)
+        try:
+            result = await group.can_run(ctx)
+        except commands.errors.CheckFailure:
+            result = False
+        for c in group.commands:
+            if result and not c.hidden:
+                signature = self.get_command_signature(c)
+                description = self.get_command_help(c)
+                if c.parent:  # it is a sub-command
+                    embed.add_field(name=f'**╚╡**{signature}', value=description)
+                else:
+                    embed.add_field(name=signature, value=description, inline=False)
+        embed.set_footer(text=f'Use "{self.clean_prefix}help <command>" for more info on a command.',
+                         icon_url=ctx.bot.user.avatar_url)
+        return embed
+
+    async def send_command_help(self, command):
+        ctx = self.context
+        bot = ctx.bot
+        page = -1
+        def check(reaction, user):  # check who is reacting to the message
+            return user == ctx.author
+
+        embed = await self.bot_help_command_paginator(page, command)
+        help_embed = await ctx.send(embed=embed)  # sends the first help page
+
+        reactions = ('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}',
+                     '\N{BLACK LEFT-POINTING TRIANGLE}',
+                     '\N{BLACK RIGHT-POINTING TRIANGLE}',
+                     '\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}',
+                     '\N{BLACK SQUARE FOR STOP}',
+                     '\N{INFORMATION SOURCE}')  # add reactions to the message
+        bot.loop.create_task(self.bot_help_paginator_reactor(help_embed, reactions))
+        # this allows the bot to carry on setting up the help command
+
+        while 1:
+            try:
+                reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
+            except asyncio.TimeoutError:  # session has timed out
+                try:
+                    await help_embed.clear_reactions()
+                except discord.errors.Forbidden:
+                    pass
+                break
+            else:
+                try:
+                    await help_embed.remove_reaction(str(reaction.emoji), ctx.author)  # remove the reaction 
+                except discord.errors.Forbidden:
+                    pass
+
+                if str(reaction.emoji) == '⏭':  # go to the last the page
+                    page = 0
+                    embed = await self.bot_help_command_paginator(page, command)
+                    await help_embed.edit(embed=embed)
+                elif str(reaction.emoji) == '⏮':  # go to the first page
+                    page = -1
+                    embed = await self.bot_help_command_paginator(page, command)
+                    await help_embed.edit(embed=embed)
+
+                elif str(reaction.emoji) == '◀':  # go to the previous page
+                    page -= 1
+                    if page == -2:  # check whether to go to the final page
+                        page = 0
+                    embed = await self.bot_help_command_paginator(page, command)
+                    await help_embed.edit(embed=embed)
+                elif str(reaction.emoji) == '▶':  # go to the next page
+                    page += 1
+                    if page == 1:  # check whether to go to the first page
+                        page = -1
+                    embed = await self.bot_help_command_paginator(page, command)
+                    await help_embed.edit(embed=embed)
+
+                elif str(reaction.emoji) == 'ℹ':  # show information help
+                    embed = self.get_information_page()
+                    await help_embed.edit(embed=set_style(embed))
+
+                elif str(reaction.emoji) == '⏹':  # delete the message and break from the wait_for
+                    await help_embed.delete()
+                    break
+    
+    async def bot_help_command_paginator(self, page: int, command):
+        ctx = self.context
+        bot = ctx.bot
+
+        if (page == -1):
+            return set_style(self.get_information_page())
+
+        embed = discord.Embed(title=f'{bot.user.name} | Help with {self.clean_prefix}{command}    :gear:',
+                              description=' ', color=discord.Colour.purple())
+        embed.set_author(name=f'Page {page + 1}/{1}', icon_url=ctx.bot.user.avatar_url)
+        try:
+            result = await command.can_run(ctx)
+        except commands.errors.CheckFailure:
+            result = False
+        if result and not command.hidden:
+            signature = self.get_command_signature(command)
+            description = self.get_command_help(command)
+            if command.parent:  # it is a sub-command
+                embed.add_field(name=f'**╚╡**{signature}', value=description)
+            else:
+                embed.add_field(name=signature, value=description, inline=False)
+        embed.set_footer(text=f'Use "{self.clean_prefix}help <command>" for more info on a command.',
+                         icon_url=ctx.bot.user.avatar_url)
+        return embed
 
 class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
     '''Cog in charge of different utilities, mostly related with bot (admin) stuff or general events.'''
