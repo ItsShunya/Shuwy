@@ -581,6 +581,7 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         await ctx.send(embed=set_style(embed))
 
     @commands.command(hidden=False)
+    @commands.guild_only()
     async def invite(self, ctx, channel:discord.TextChannel):
         '''Creates an invite link for the channel.
 
