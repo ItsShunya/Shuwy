@@ -21,11 +21,11 @@ if sys.version_info[1] < 6 or sys.version_info[0] < 3:
     print('[ERROR] Python 3.6 or + is required.')
     exit()
 
-# Configuration parameters set up.
-dotenv_path = os.path.join(f'{os.path.dirname(__file__)}/config', '.env')
+# Configuration parameters set-up.
+dotenv_path = os.path.join(f'{os.path.dirname(sys.argv[0])}/config', '.env')
 load_dotenv(dotenv_path)
 token = os.getenv('DISCORD_TOKEN')
-database_path = os.path.join(f'{os.path.dirname(__file__)}/config', 'database.sqlite')
+database_path = os.path.join(f'{os.path.dirname(sys.argv[0])}/config', 'database.sqlite')
 
 @contextlib.contextmanager # No need to define __enter__() and __exit__() methods.
 def logger():
@@ -77,8 +77,10 @@ def get_prefix(bot, message):
     # If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
+intents = discord.Intents.all()
+
 description = '''Shuwy is a bot written by `Shunya#1624`. It implements basic moderation functions, automation and music.'''
-bot = commands.Bot(command_prefix=get_prefix, owner_id=125345019199488000, case_insensitive=True, description=description)
+bot = commands.Bot(command_prefix = get_prefix, owner_id = 125345019199488000, case_insensitive = True, description = description, intents = intents)
 
 bot.version = '0.0.7'
 bot.color = 0xebb145
@@ -148,7 +150,7 @@ async def on_ready():
     print(f'• ID: {bot.user.id}')
     print(f'• Shuwy version: {bot.version}')
     print(f'• Discord.py version: {discord.__version__}')
-    print(f'• Python version: {platform.__version__}')
+    print(f'• Python version: {platform.python_version()}')
     print('-------------------------------')
 
     # TO-DO: Change the following line to not include it in the on_ready event. 
