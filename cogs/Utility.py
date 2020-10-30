@@ -512,9 +512,9 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
                     if os.path.exists(f'cogs/{name}.py'):
                         self.bot.reload_extension(f'cogs.{name}')
                     else:
-                        raise ImportError(f'No module named `{msg}.py`')
+                        raise ImportError(f'No module named `{name}.py`')
                 except Exception as e:
-                    message = f'Failed to reload module: `{msg}.py`: {e}'
+                    message = f'Failed to reload module: `{name}.py`: {e}'
                     return await ctx.send(embed=embed_error(message, input1=ctx, input2=e))
                 else:
                     pass
