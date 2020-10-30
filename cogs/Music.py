@@ -9,6 +9,7 @@ import re
 import typing
 import wavelink
 from discord.ext import commands, menus
+from utilities.embeds import embed_error, set_style
 
 # URL matching REGEX...
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
@@ -117,7 +118,7 @@ class Player(wavelink.Player):
         channel = self.bot.get_channel(int(self.channel_id))
         qsize = self.queue.qsize()
 
-        embed = discord.Embed(title=f'Music Controller | {channel.name}', colour=0xebb145)
+        embed = discord.Embed(title=f'Music Controller | {channel.name}', colour=discord.Colour.purple())
         embed.description = f'Now Playing:\n**`{track.title}`**\n\n'
         embed.set_thumbnail(url=track.thumb)
 
@@ -127,6 +128,7 @@ class Player(wavelink.Player):
         embed.add_field(name='Requested By', value=track.requester.mention)
         embed.add_field(name='DJ', value=self.dj.mention)
         embed.add_field(name='Video URL', value=f'[Click Here!]({track.uri})')
+        embed.set_footer(text = 'Developed by Shunya#1624 ', icon_url = 'https://yt3.ggpht.com/a/AATXAJwhPDl8XMKJJmXiBj-bsQFBDfEFluin0ywkZ66M=s100-c-k-c0xffffffff-no-rj-mo')
 
         return embed
 
@@ -203,6 +205,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u23F8')
     async def pause_command(self, payload: discord.RawReactionActionEvent):
@@ -214,6 +217,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u23F9')
     async def stop_command(self, payload: discord.RawReactionActionEvent):
@@ -224,7 +228,7 @@ class InteractiveController(menus.Menu):
         command = self.bot.get_command('stop')
         ctx.command = command
 
-        await self.bot.invoke(ctx)
+        await self.bot.invoke(ctx) 
 
     @menus.button(emoji='\u23ED')
     async def skip_command(self, payload: discord.RawReactionActionEvent):
@@ -236,6 +240,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\U0001F500')
     async def shuffle_command(self, payload: discord.RawReactionActionEvent):
@@ -247,6 +252,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u2795')
     async def volup_command(self, payload: discord.RawReactionActionEvent):
@@ -258,6 +264,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\u2796')
     async def voldown_command(self, payload: discord.RawReactionActionEvent):
@@ -269,6 +276,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
     @menus.button(emoji='\U0001F1F6')
     async def queue_command(self, payload: discord.RawReactionActionEvent):
@@ -280,7 +288,7 @@ class InteractiveController(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
-
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
 class PaginatorSource(menus.ListPageSource):
     '''Player queue paginator class.'''
@@ -289,7 +297,7 @@ class PaginatorSource(menus.ListPageSource):
         super().__init__(entries, per_page=per_page)
 
     async def format_page(self, menu: menus.Menu, page):
-        embed = discord.Embed(title='Coming Up...', colour=0x4f0321)
+        embed = discord.Embed(title='Coming Up...', colour=discord.Colour.purple())
         embed.description = '\n'.join(f'`{index}. {title}`' for index, title in enumerate(page, 1))
 
         return embed
@@ -299,7 +307,7 @@ class PaginatorSource(menus.ListPageSource):
         return True
 
 
-class MusicCog(commands.Cog, wavelink.WavelinkMixin):
+class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
     '''Music Cog.'''
 
     def __init__(self, bot: commands.Bot):
@@ -326,7 +334,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
                           'rest_uri': 'http://localhost:2333',
                           'password': 'ShuwyBOT311',
                           'identifier': 'MAIN',
-                          'region': 'us_central'
+                          'region': 'europe'
                           }}
 
         for n in nodes.values():
@@ -373,13 +381,15 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if isinstance(error, NoChannelProvided):
-            return await ctx.send('You must be in a voice channel or provide one to connect to.')
+            embed = discord.Embed(description='You must be in a voice channel or provide one to connect to.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
 
     async def cog_check(self, ctx: commands.Context):
         '''Cog wide check, which disallows commands in DMs.'''
 
-        if not ctx.guild:
-            await ctx.send('Music commands are not available in Private Messages.')
+        if not ctx.guild and '!help' not in ctx.message.content:
+            embed = discord.Embed(description='Music commands are not available in Private Messages.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed))
             return False
         
         return True
@@ -391,7 +401,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
         player: Player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player, context=ctx)
         if player.context:
             if player.context.channel != ctx.channel:
-                await ctx.send(f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.')
+                embed = discord.Embed(description=f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.', color=discord.Colour.purple())  
+                await ctx.send(embed=set_style(embed))
                 raise IncorrectChannelError
 
         if ctx.command.name == 'connect' and not player.context:
@@ -408,7 +419,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
 
         if player.is_connected:
             if ctx.author not in channel.members:
-                await ctx.send(f'{ctx.author.mention}, you must be in `{channel.name}` to use voice commands.')
+                embed = discord.Embed(description=f'{ctx.author.mention}, you must be in `{channel.name}` to use voice commands.', color=discord.Colour.purple())  
+                await ctx.send(embed=set_style(embed))
                 raise IncorrectChannelError
 
     def required(self, ctx: commands.Context):
@@ -461,18 +473,21 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
 
         tracks = await self.bot.wavelink.get_tracks(query)
         if not tracks:
-            return await ctx.send('No songs were found with that query. Please try again.', delete_after=15)
+            embed = discord.Embed(description='No songs were found with that query. Please try again.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         if isinstance(tracks, wavelink.TrackPlaylist):
             for track in tracks.tracks:
                 track = Track(track.id, track.info, requester=ctx.author)
                 await player.queue.put(track)
 
-            await ctx.send(f'```ini\nAdded the playlist {tracks.data["playlistInfo"]["name"]}'
-                           f' with {len(tracks.tracks)} songs to the queue.\n```', delete_after=15)
+            embed = discord.Embed(description=f'Added the playlist {tracks.data["playlistInfo"]["name"]}'
+                                              f' with {len(tracks.tracks)} songs to the queue.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8) 
         else:
             track = Track(tracks[0].id, tracks[0].info, requester=ctx.author)
-            await ctx.send(f'```ini\nAdded {track.title} to the Queue\n```', delete_after=15)
+            embed = discord.Embed(description=f'Added {track.title} to the Queue', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             await player.queue.put(track)
 
         if not player.is_playing:
@@ -488,7 +503,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if self.is_privileged(ctx):
-            await ctx.send('An admin or DJ has paused the player.', delete_after=10)
+            embed = discord.Embed(description='An admin or DJ has paused the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.pause_votes.clear()
 
             return await player.set_pause(True)
@@ -497,11 +513,13 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
         player.pause_votes.add(ctx.author)
 
         if len(player.pause_votes) >= required:
-            await ctx.send('Vote to pause passed. Pausing player.', delete_after=10)
+            embed = discord.Embed(description='Vote to pause passed. Pausing player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.pause_votes.clear()
             await player.set_pause(True)
         else:
-            await ctx.send(f'{ctx.author.mention} has voted to pause the player.', delete_after=15)
+            embed = discord.Embed(description=f'{ctx.author.mention} has voted to pause the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
     async def resume(self, ctx: commands.Context):
@@ -513,7 +531,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if self.is_privileged(ctx):
-            await ctx.send('An admin or DJ has resumed the player.', delete_after=10)
+            embed = discord.Embed(description='An admin or DJ has resumed the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.resume_votes.clear()
 
             return await player.set_pause(False)
@@ -522,11 +541,13 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
         player.resume_votes.add(ctx.author)
 
         if len(player.resume_votes) >= required:
-            await ctx.send('Vote to resume passed. Resuming player.', delete_after=10)
+            embed = discord.Embed(description='Vote to resume passed. Resuming player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.resume_votes.clear()
             await player.set_pause(False)
         else:
-            await ctx.send(f'{ctx.author.mention} has voted to resume the player.', delete_after=15)
+            embed = discord.Embed(description=f'{ctx.author.mention} has voted to resume the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
     async def skip(self, ctx: commands.Context):
@@ -538,13 +559,15 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if self.is_privileged(ctx):
-            await ctx.send('An admin or DJ has skipped the song.', delete_after=10)
+            embed = discord.Embed(description='An admin or DJ has skipped the song.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.skip_votes.clear()
 
             return await player.stop()
 
         if ctx.author == player.current.requester:
-            await ctx.send('The song requester has skipped the song.', delete_after=10)
+            embed = discord.Embed(description='The song requester has skipped the song.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.skip_votes.clear()
 
             return await player.stop()
@@ -553,11 +576,13 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
         player.skip_votes.add(ctx.author)
 
         if len(player.skip_votes) >= required:
-            await ctx.send('Vote to skip passed. Skipping song.', delete_after=10)
+            embed = discord.Embed(description='Vote to skip passed. Skipping song.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.skip_votes.clear()
             await player.stop()
         else:
-            await ctx.send(f'{ctx.author.mention} has voted to skip the song.', delete_after=15)
+            embed = discord.Embed(description=f'{ctx.author.mention} has voted to skip the song.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
     async def stop(self, ctx: commands.Context):
@@ -569,17 +594,20 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if self.is_privileged(ctx):
-            await ctx.send('An admin or DJ has stopped the player.', delete_after=10)
+            embed = discord.Embed(description='An admin or DJ has stopped the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             return await player.teardown()
 
         required = self.required(ctx)
         player.stop_votes.add(ctx.author)
 
         if len(player.stop_votes) >= required:
-            await ctx.send('Vote to stop passed. Stopping the player.', delete_after=10)
+            embed = discord.Embed(description='Vote to stop passed. Stopping the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             await player.teardown()
         else:
-            await ctx.send(f'{ctx.author.mention} has voted to stop the player.', delete_after=15)
+            embed = discord.Embed(description=f'{ctx.author.mention} has voted to stop the player.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(aliases=['v', 'vol'])
     async def volume(self, ctx: commands.Context, *, vol: int):
@@ -591,13 +619,16 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if not self.is_privileged(ctx):
-            return await ctx.send('Only the DJ or admins may change the volume.')
+            embed = discord.Embed(description='Only the DJ or admins may change the volume.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
 
         if not 0 < vol < 101:
-            return await ctx.send('Please enter a value between 1 and 100.')
+            embed = discord.Embed(description='Please enter a value between 1 and 100.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
 
         await player.set_volume(vol)
-        await ctx.send(f'Set the volume to **{vol}**%', delete_after=7)
+        embed = discord.Embed(description=f'Set the volume to **{vol}**%', color=discord.Colour.purple())  
+        await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(aliases=['mix'])
     async def shuffle(self, ctx: commands.Context):
@@ -609,10 +640,12 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if player.queue.qsize() < 3:
-            return await ctx.send('Add more songs to the queue before shuffling.', delete_after=15)
+            embed = discord.Embed(description='Add more songs to the queue before shuffling.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         if self.is_privileged(ctx):
-            await ctx.send('An admin or DJ has shuffled the playlist.', delete_after=10)
+            embed = discord.Embed(description='An admin or DJ has shuffled the playlist.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.shuffle_votes.clear()
             return random.shuffle(player.queue._queue)
 
@@ -620,11 +653,13 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
         player.shuffle_votes.add(ctx.author)
 
         if len(player.shuffle_votes) >= required:
-            await ctx.send('Vote to shuffle passed. Shuffling the playlist.', delete_after=10)
+            embed = discord.Embed(description='Vote to shuffle passed. Shuffling the playlist.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
             player.shuffle_votes.clear()
             random.shuffle(player.queue._queue)
         else:
-            await ctx.send(f'{ctx.author.mention} has voted to shuffle the playlist.', delete_after=15)
+            embed = discord.Embed(description=f'{ctx.author.mention} has voted to shuffle the playlist.', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(hidden=True)
     async def vol_up(self, ctx: commands.Context):
@@ -639,7 +674,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
 
         if vol > 100:
             vol = 100
-            await ctx.send('Maximum volume reached', delete_after=7)
+            embed = discord.Embed(description='Maximum volume reached', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
         await player.set_volume(vol)
 
@@ -656,7 +692,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
 
         if vol < 0:
             vol = 0
-            await ctx.send('Player is currently muted', delete_after=10)
+            embed = discord.Embed(description='Player is currently muted', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed), delete_after=8)
 
         await player.set_volume(vol)
 
@@ -670,7 +707,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if not self.is_privileged(ctx):
-            return await ctx.send('Only the DJ or admins may change the equalizer.')
+            embed = discord.Embed(description='Only the DJ or admins may change the equalizer.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         eqs = {'flat': wavelink.Equalizer.flat(),
                'boost': wavelink.Equalizer.boost(),
@@ -681,9 +719,11 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
 
         if not eq:
             joined = "\n".join(eqs.keys())
-            return await ctx.send(f'Invalid EQ provided. Valid EQs:\n\n{joined}')
+            embed = discord.Embed(description=f'Invalid EQ provided. Valid EQs:\n\n{joined}', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
 
-        await ctx.send(f'Successfully changed equalizer to {equalizer}', delete_after=15)
+        embed = discord.Embed(description=f'Successfully changed equalizer to {equalizer}', color=discord.Colour.purple())  
+        await ctx.send(embed=set_style(embed), delete_after=8)
         await player.set_eq(eq)
 
     @commands.command(aliases=['q', 'que'])
@@ -696,7 +736,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if player.queue.qsize() == 0:
-            return await ctx.send('There are no more songs in the queue.', delete_after=15)
+            embed = discord.Embed(description='There are no more songs in the queue.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         entries = [track.title for track in player.queue._queue]
         pages = PaginatorSource(entries=entries)
@@ -725,29 +766,36 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if not self.is_privileged(ctx):
-            return await ctx.send('Only admins and the DJ may use this command.', delete_after=15)
+            embed = discord.Embed(description='There are no more songs in the queue.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
+            return await ctx.send('Only admins and the DJ may use this command.', delete_after=8)
 
         members = self.bot.get_channel(int(player.channel_id)).members
 
         if member and member not in members:
-            return await ctx.send(f'{member} is not currently in voice, so can not be a DJ.', delete_after=15)
+            embed = discord.Embed(description=f'{member} is not currently in voice, so can not be a DJ.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         if member and member == player.dj:
-            return await ctx.send('Cannot swap DJ to the current DJ... :)', delete_after=15)
+            embed = discord.Embed(description='Cannot swap DJ to the current DJ... :)', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         if len(members) <= 2:
-            return await ctx.send('No more members to swap to.', delete_after=15)
+            embed = discord.Embed(description='No more members to swap to.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         if member:
             player.dj = member
-            return await ctx.send(f'{member.mention} is now the DJ.')
+            embed = discord.Embed(description=f'{member.mention} is now the DJ.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed), delete_after=8)
 
         for m in members:
             if m == player.dj or m.bot:
                 continue
             else:
                 player.dj = m
-                return await ctx.send(f'{member.mention} is now the DJ.')
+                embed = discord.Embed(description=f'{member.mention} is now the DJ.', color=discord.Colour.purple())  
+                return await ctx.send(embed=set_style(embed), delete_after=8)
 
 
 def setup(bot):

@@ -10,10 +10,10 @@ class MathCog(commands.Cog, name='Math'):
 
     @commands.command(name='add', aliases=['plus'])
     async def do_addition(self, ctx, first: int, second: int):
-        '''A simple command which does addition on two integer values.'''
+        '''A simple command which does addition on two values.'''
 
         total = first + second
-        embed = discord.Embed(title=f'Hello, @**{ctx.author.name}**!', description=f'The sum of **{first}** and **{second}**  is  **{total}**.', color=0xebb145)  
+        embed = discord.Embed(title=f'Hello, @**{ctx.author.name}**!', description=f'The sum of **{first}** and **{second}**  is  **{total}**.', color=discord.Colour.purple())  
         await ctx.send(embed=set_style(embed))
 
 

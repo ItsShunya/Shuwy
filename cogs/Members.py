@@ -15,35 +15,32 @@ class MembersCog(commands.Cog, name='Members'):
         self.bot = bot
 
     @commands.command(name='joined', aliases=['unido', 'entered'])
-    @commands.guild_only()
     async def joined(self, ctx, *, member: discord.Member=None):
-        '''Says when a member joined.
+        '''Says when a member joined the server.
 
         Keyword arguments:
         member -- member object that we want to check  '''
 
         if member is None:
             member = ctx.author
-        embed = discord.Embed(color=0xebb145, description=f'{member.display_name} joined on {member.joined_at}')
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'{member.display_name} joined on {member.joined_at}')
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='top_role', aliases=['toprole', 'top_rol', 'toprol'])
-    @commands.guild_only()
     async def show_toprole(self, ctx, *, member: discord.Member=None):
-        '''Simple command which shows the members Top Role.
+        '''Shows the members most important role.
         
         Keyword arguments:
         member -- member object that we want to check  '''
 
         if member is None:
             member = ctx.author
-        embed = discord.Embed(color=0xebb145, description=f'The top role for {member.display_name} is {member.top_role.name}')
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'The top role for {member.display_name} is {member.top_role.name}')
         await ctx.send(embed=set_style(embed))
 
     @commands.command(name='perms', aliases=['perms_for', 'permissions'])
-    @commands.guild_only()
     async def check_permissions(self, ctx, *, member: discord.Member=None):
-        '''A simple command which checks a members Guild Permissions.
+        '''A simple command which checks a members permissions.
         If member is not provided, the author will be checked.
         
         Keyword arguments:
@@ -54,25 +51,24 @@ class MembersCog(commands.Cog, name='Members'):
         # Here we check if the value of each permission is True.
         perms = '\n'.join(perm for perm, value in member.guild_permissions if value)
         # And to make it look nice, we wrap it in an Embed.
-        embed = discord.Embed(title='Permissions for:', description=ctx.guild.name, colour=0xebb145)
+        embed = discord.Embed(title='Permissions for:', description=ctx.guild.name, color=discord.Colour.purple())
         embed.set_author(icon_url=member.avatar_url, name=str(member))
         # \uFEFF is a Zero-Width Space, which basically allows us to have an empty field name.
         embed.add_field(name='\uFEFF', value=perms)
         await ctx.send(content=None, embed=set_style(embed))
 
     @commands.group(invoke_without_commands=True)
-    @commands.guild_only()
     async def welcome(self, ctx):
-        '''Command to set the preferences for the welcome channel/message/role.
+        '''Sets the preferences for the welcome channel/message/role.
            Needs to be used together with one of its subcommands.'''
 
         if ctx.invoked_subcommand is None:
-            embed = discord.Embed(color=0xebb145, title='Available Commands:', description='welcome channel <#channel>\nwelcome text <message>\nwelcome role <@role>\nwelcome channel_on\nwelcome channel_off\nwelcome role_on\nwelcome role_off')
+            embed = discord.Embed(color=discord.Colour.purple(), title='Available Commands:', description='welcome channel <#channel>\nwelcome text <message>\nwelcome role <@role>\nwelcome channel_on\nwelcome channel_off\nwelcome role_on\nwelcome role_off')
             await ctx.send(embed=set_style(embed))
 
     @welcome.command()
     async def channel(self, ctx, channel:discord.TextChannel):
-        '''Subcommand for "welcome" function to set the welcome channel.
+        '''Subcommand to set the welcome channel.
         
         Keyword arguments:
         channel -- channel to be used for welcome messages'''
@@ -84,7 +80,8 @@ class MembersCog(commands.Cog, name='Members'):
             result = cursor.fetchone()
             sql = ("UPDATE database SET welcome_channel_id = ? WHERE guild_id = ?")
             val = (channel.id, ctx.guild.id)
-            await ctx.send(f'Welcome Channel has been set to {channel.mention}')
+            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Channel has been set to {channel.mention}')
+            await ctx.send(embed=set_style(embed))
             cursor.execute(sql, val)
             database.commit()
             cursor.close()
@@ -94,7 +91,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def text(self, ctx, *, text):
-        '''Subcommand for "welcome" function to set the welcome message.
+        '''Subcommand to set the welcome message.
         
         Keyword arguments:
         text -- message to be used as welcome messages'''
@@ -107,7 +104,8 @@ class MembersCog(commands.Cog, name='Members'):
             result = cursor.fetchone()
             sql = ("UPDATE database SET welcome_msg = ? WHERE guild_id = ?")
             val = (text, ctx.guild.id)
-            await ctx.send(f'Welcome Message has been set to `{text}`')
+            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Message has been set to `{text}`')
+            await ctx.send(embed=set_style(embed))
             cursor.execute(sql, val)
             database.commit()
             cursor.close()
@@ -117,7 +115,7 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def role(self, ctx, role:discord.Role):
-        '''Subcommand for "welcome" function to set the welcome role.
+        '''Subcommand to set the welcome role.
         
         Keyword arguments:
         role -- role to be set to new server members'''
@@ -127,7 +125,8 @@ class MembersCog(commands.Cog, name='Members'):
             cursor = database.cursor()
             sql = ("UPDATE database SET welcome_role_id = ? WHERE guild_id = ?")
             val = (role.id, ctx.guild.id)
-            await ctx.send(f'Welcome Role has been set to {role.mention}')
+            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Role has been set to {role.mention}')
+            await ctx.send(embed=set_style(embed))
             cursor.execute(sql, val)
             database.commit()
             cursor.close()
@@ -137,56 +136,60 @@ class MembersCog(commands.Cog, name='Members'):
 
     @welcome.command()
     async def channel_on(self, ctx):
-        '''Subcommand for "welcome" function to activate the welcome message.'''
+        '''Subcommand to activate the welcome message.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
         sql = ("UPDATE database SET welcome_channel_on = ? WHERE guild_id = ?")
         val = (1, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Channel has been activated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been activated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
 
     @welcome.command()
     async def channel_off(self, ctx):
-        '''Subcommand for "welcome" function to deactivate the welcome message.'''
+        '''Subcommand to deactivate the welcome message.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
         sql = ("UPDATE database SET welcome_channel_on = ? WHERE guild_id = ?")
         val = (0, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Channel has been deactivated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been deactivated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
 
     @welcome.command()
     async def role_on(self, ctx):
-        '''Subcommand for "welcome" function to activate the welcome role.'''
+        '''Subcommand to activate the welcome role.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
         sql = ("UPDATE database SET welcome_role_on = ? WHERE guild_id = ?")
         val = (1, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Role has been activated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Role has been activated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
 
     @welcome.command()
     async def role_off(self, ctx):
-        '''Subcommand for "welcome" function to deactivate the welcome role.'''
+        '''Subcommand to deactivate the welcome role.'''
 
         database = sqlite3.connect(database_path)
         cursor = database.cursor()
         sql = ("UPDATE database SET welcome_role_on = ? WHERE guild_id = ?")
         val = (0, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Role has been deactivated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been deactivated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
@@ -251,7 +254,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.Cog.listener()
-    @commands.guild_only()
     async def on_raw_reaction_add(self, reaction):
         '''Event that takes places when a reaction is added to a message.'''
 
@@ -282,7 +284,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.Cog.listener()
-    @commands.guild_only()
     async def on_raw_reaction_remove(self, reaction):
         '''Event that takes places when a reaction is deleted from a message.'''
 
@@ -313,7 +314,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.command()
-    @commands.guild_only()
     async def role_add(self, ctx, channel:discord.TextChannel, messageid, emoji, role:discord.Role):
         '''Sets a role to be added to a user when he reacts to a pre-defined message with a pre-defined role.
 
@@ -348,7 +348,6 @@ class MembersCog(commands.Cog, name='Members'):
         database.close()
 
     @commands.command()
-    @commands.guild_only()
     async def role_remove(self, ctx, messageid=None, emoji=None):
         '''Use it after using role_add to make the bot remove the emoji and stop adding the role to the person reacting to it.
 
@@ -366,7 +365,7 @@ class MembersCog(commands.Cog, name='Members'):
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
             elif str(messageid) in str(result[2]):
                 cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emm}'")
-                embed = discord.Embed(description='Reaction has been removed.', color=0xffd500)  
+                embed = discord.Embed(description='Reaction has been removed.', color=discord.Colour.purple())  
                 await ctx.send(embed=set_style(embed))
             else:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
@@ -375,13 +374,23 @@ class MembersCog(commands.Cog, name='Members'):
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
             elif str(messageid) in str(result[2]):
                 cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emoji}'")
-                embed = discord.Embed(description='Reaction has been removed.', color=0xffd500)  
+                embed = discord.Embed(description='Reaction has been removed.', color=discord.Colour.purple())  
                 await ctx.send(embed=set_style(embed))
             else:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
         database.commit()
         cursor.close()
         database.close()
+
+    async def cog_check(self, ctx: commands.Context):
+        '''Cog wide check, which disallows commands in DMs.'''
+
+        if not ctx.guild and '!help' not in ctx.message.content:
+            embed = discord.Embed(description='Member related commands are not available in Private Messages!', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed))
+            return False
+        
+        return True
 
 def setup(bot):
     bot.add_cog(MembersCog(bot))
