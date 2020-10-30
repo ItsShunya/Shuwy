@@ -100,7 +100,8 @@ class ModerationCog(commands.Cog, name='Moderation'):
         '''Cog wide check, which disallows commands in DMs.'''
 
         if not ctx.guild and '!help' not in ctx.message.content:
-            await ctx.send('Moderation commands are not available in Private Messages!')
+            embed = discord.Embed(description='Moderation commands are not available in Private Messages!', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed))
             return False
         
         return True
