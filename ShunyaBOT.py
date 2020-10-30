@@ -82,7 +82,7 @@ intents = discord.Intents.all()
 description = '''Shuwy is a bot written by `Shunya#1624`. It implements basic moderation functions, automation and music.'''
 bot = commands.Bot(command_prefix = get_prefix, owner_id = 125345019199488000, case_insensitive = True, description = description, intents = intents)
 
-bot.version = '0.0.7'
+bot.version = '0.2.1'
 bot.color = 0xebb145
 bot.log =logging.getLogger('bot')
 
