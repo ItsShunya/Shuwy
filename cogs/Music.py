@@ -444,6 +444,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         return player.dj == ctx.author or ctx.author.guild_permissions.kick_members
 
     @commands.command()
+    @commands.guild_only()
     async def connect(self, ctx: commands.Context, *, channel: discord.VoiceChannel = None):
         '''Connect to a voice channel.'''
 
@@ -459,6 +460,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.connect(channel.id)
 
     @commands.command()
+    @commands.guild_only()
     async def play(self, ctx: commands.Context, *, query: str):
         '''Play or queue a song with the given query.'''
 
@@ -494,6 +496,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await player.do_next()
 
     @commands.command()
+    @commands.guild_only()
     async def pause(self, ctx: commands.Context):
         '''Pause the currently playing song.'''
 
@@ -522,6 +525,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
+    @commands.guild_only()
     async def resume(self, ctx: commands.Context):
         '''Resume a currently paused player.'''
 
@@ -550,6 +554,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
+    @commands.guild_only()
     async def skip(self, ctx: commands.Context):
         '''Skip the currently playing song.'''
 
@@ -585,6 +590,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
+    @commands.guild_only()
     async def stop(self, ctx: commands.Context):
         '''Stop the player and clear all internal states.'''
 
@@ -610,6 +616,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(aliases=['v', 'vol'])
+    @commands.guild_only()
     async def volume(self, ctx: commands.Context, *, vol: int):
         '''Change the players volume, between 1 and 100.'''
 
@@ -631,6 +638,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(aliases=['mix'])
+    @commands.guild_only()
     async def shuffle(self, ctx: commands.Context):
         '''Shuffle the players queue.'''
 
@@ -662,6 +670,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(hidden=True)
+    @commands.guild_only()
     async def vol_up(self, ctx: commands.Context):
         '''Command used for volume up button.'''
 
@@ -680,6 +689,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.set_volume(vol)
 
     @commands.command(hidden=True)
+    @commands.guild_only()
     async def vol_down(self, ctx: commands.Context):
         '''Command used for volume down button.'''
 
@@ -698,6 +708,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.set_volume(vol)
 
     @commands.command(aliases=['eq'])
+    @commands.guild_only()
     async def equalizer(self, ctx: commands.Context, *, equalizer: str):
         '''Change the players equalizer.'''
 
@@ -727,6 +738,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.set_eq(eq)
 
     @commands.command(aliases=['q', 'que'])
+    @commands.guild_only()
     async def queue(self, ctx: commands.Context):
         '''Display the players queued songs.'''
 
@@ -746,6 +758,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await paginator.start(ctx)
 
     @commands.command(aliases=['np', 'now_playing', 'current'])
+    @commands.guild_only()
     async def nowplaying(self, ctx: commands.Context):
         '''Update the player controller.'''
 
@@ -757,6 +770,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.invoke_controller()
 
     @commands.command(aliases=['swap'])
+    @commands.guild_only()
     async def swap_dj(self, ctx: commands.Context, *, member: discord.Member = None):
         '''Swap the current DJ to another member in the voice channel.'''
 
