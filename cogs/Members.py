@@ -51,7 +51,7 @@ class MembersCog(commands.Cog, name='Members'):
         # Here we check if the value of each permission is True.
         perms = '\n'.join(perm for perm, value in member.guild_permissions if value)
         # And to make it look nice, we wrap it in an Embed.
-        embed = discord.Embed(title='Permissions for:', description=ctx.guild.name, colour=0xebb145)
+        embed = discord.Embed(title='Permissions for:', description=ctx.guild.name, color=discord.Colour.purple())
         embed.set_author(icon_url=member.avatar_url, name=str(member))
         # \uFEFF is a Zero-Width Space, which basically allows us to have an empty field name.
         embed.add_field(name='\uFEFF', value=perms)
@@ -80,7 +80,8 @@ class MembersCog(commands.Cog, name='Members'):
             result = cursor.fetchone()
             sql = ("UPDATE database SET welcome_channel_id = ? WHERE guild_id = ?")
             val = (channel.id, ctx.guild.id)
-            await ctx.send(f'Welcome Channel has been set to {channel.mention}')
+            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Channel has been set to {channel.mention}')
+            await ctx.send(embed=set_style(embed))
             cursor.execute(sql, val)
             database.commit()
             cursor.close()
@@ -103,7 +104,8 @@ class MembersCog(commands.Cog, name='Members'):
             result = cursor.fetchone()
             sql = ("UPDATE database SET welcome_msg = ? WHERE guild_id = ?")
             val = (text, ctx.guild.id)
-            await ctx.send(f'Welcome Message has been set to `{text}`')
+            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Message has been set to `{text}`')
+            await ctx.send(embed=set_style(embed))
             cursor.execute(sql, val)
             database.commit()
             cursor.close()
@@ -123,7 +125,8 @@ class MembersCog(commands.Cog, name='Members'):
             cursor = database.cursor()
             sql = ("UPDATE database SET welcome_role_id = ? WHERE guild_id = ?")
             val = (role.id, ctx.guild.id)
-            await ctx.send(f'Welcome Role has been set to {role.mention}')
+            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Role has been set to {role.mention}')
+            await ctx.send(embed=set_style(embed))
             cursor.execute(sql, val)
             database.commit()
             cursor.close()
@@ -140,7 +143,8 @@ class MembersCog(commands.Cog, name='Members'):
         sql = ("UPDATE database SET welcome_channel_on = ? WHERE guild_id = ?")
         val = (1, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Channel has been activated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been activated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
@@ -154,7 +158,8 @@ class MembersCog(commands.Cog, name='Members'):
         sql = ("UPDATE database SET welcome_channel_on = ? WHERE guild_id = ?")
         val = (0, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Channel has been deactivated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been deactivated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
@@ -168,7 +173,8 @@ class MembersCog(commands.Cog, name='Members'):
         sql = ("UPDATE database SET welcome_role_on = ? WHERE guild_id = ?")
         val = (1, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Role has been activated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Role has been activated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
@@ -182,7 +188,8 @@ class MembersCog(commands.Cog, name='Members'):
         sql = ("UPDATE database SET welcome_role_on = ? WHERE guild_id = ?")
         val = (0, ctx.guild.id)
         cursor.execute(sql, val)
-        await ctx.send('Welcome Role has been deactivated.')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been deactivated.')
+        await ctx.send(embed=set_style(embed))
         database.commit()
         cursor.close()
         database.close()
@@ -379,7 +386,8 @@ class MembersCog(commands.Cog, name='Members'):
         '''Cog wide check, which disallows commands in DMs.'''
 
         if not ctx.guild and '!help' not in ctx.message.content:
-            await ctx.send('Member related commands are not available in Private Messages!')
+            embed = discord.Embed(description='Member related commands are not available in Private Messages!', color=discord.Colour.purple())  
+            await ctx.send(embed=set_style(embed))
             return False
         
         return True
