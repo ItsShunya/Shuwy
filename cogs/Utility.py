@@ -598,7 +598,7 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         if ctx.guild is None:
             self.bot.log.info(f'Command was called for execution in a private message     Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}')
         else:
-            self.bot.log.info(f'Command was called for execution in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.name} | Guild Name: {ctx.guild.id}')
+            self.bot.log.info(f'Command was called for execution in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.id} | Guild Name: {ctx.guild.name}')
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
@@ -608,7 +608,7 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         if ctx.guild is None:
             self.bot.log.info(f'Command was executed correctly in a private message     Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}')
         else:
-            self.bot.log.info(f'Command was execute correctly in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.name} | Guild Name: {ctx.guild.id}')
+            self.bot.log.info(f'Command was execute correctly in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.id} | Guild Name: {ctx.guild.name}')
 
 def setup(bot):
     bot.add_cog(UtilityCog(bot))
