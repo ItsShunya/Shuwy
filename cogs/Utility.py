@@ -65,7 +65,7 @@ class HelpCommand(commands.HelpCommand):
                 elif str(reaction.emoji) == '▶':  # go to the next page
                     page += 1
                     if page == len(cogs):  # check whether to go to the first page
-                        page = 0
+                        page = -1
                     embed = await self.bot_help_paginator(page, cogs)
                     await help_embed.edit(embed=embed)
 
