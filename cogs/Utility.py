@@ -37,7 +37,7 @@ class HelpCommand(commands.HelpCommand):
                 reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
             except asyncio.TimeoutError:  # session has timed out
                 try:
-                    await help_embed.clear_reactions()
+                    await help_embed.delete()
                 except discord.errors.Forbidden:
                     pass
                 break
@@ -192,7 +192,7 @@ class HelpCommand(commands.HelpCommand):
                 reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
             except asyncio.TimeoutError:  # session has timed out
                 try:
-                    await help_embed.clear_reactions()
+                    await help_embed.delete()
                 except discord.errors.Forbidden:
                     pass
                 break
@@ -283,7 +283,7 @@ class HelpCommand(commands.HelpCommand):
                 reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
             except asyncio.TimeoutError:  # session has timed out
                 try:
-                    await help_embed.clear_reactions()
+                    await help_embed.delete()
                 except discord.errors.Forbidden:
                     pass
                 break
@@ -374,7 +374,7 @@ class HelpCommand(commands.HelpCommand):
                 reaction, user = await bot.wait_for('reaction_add', timeout=60, check=check)  # checks message reactions
             except asyncio.TimeoutError:  # session has timed out
                 try:
-                    await help_embed.clear_reactions()
+                    await help_embed.delete()
                 except discord.errors.Forbidden:
                     pass
                 break
@@ -453,7 +453,8 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
     async def shutdown(self, ctx):
         '''Turns off the bot.'''
 
-        await ctx.send('Shuwy has been shutdown')
+        embed = discord.Embed(color=discord.Colour.purple(), description='Shuwy has been shutdown')
+        await ctx.send(embed=set_style(embed))
         await self.bot.logout()
 
     @commands.command()
@@ -462,11 +463,12 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         '''Loads a Module.'''
 
         try:
-            self.bot.load_extension(cog)
+            self.bot.load_extension('cogs.' + cog)
         except Exception as e:
-            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
+            return await ctx.send(embed=embed_error('There was an error while loading the extension.', input1=ctx))
         else:
-            await ctx.send('**`SUCCESS`**')
+            embed = discord.Embed(description=f'Module `{cog}` has been loaded succesfully.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
 
     @commands.command()
     @commands.is_owner()
@@ -474,11 +476,12 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         '''Unloads a Module.'''
 
         try:
-            self.bot.unload_extension(cog)
+            self.bot.unload_extension('cogs.' + cog)
         except Exception as e:
-            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
+            return await ctx.send(embed=embed_error('There was an error while unloading the extension {cog}.', input1=ctx))
         else:
-            await ctx.send('**`SUCCESS`**')
+            embed = discord.Embed(description=f'Module `{cog}` has been unloaded succesfully.', color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
 
     @commands.command()
     @commands.is_owner()
@@ -492,10 +495,31 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
                 raise ImportError(f'No module named `{msg}.py`')
         except Exception as e:
             message = f'Failed to reload module: `{msg}.py`: {e}'
-            await ctx.send(embed=embed_error(message, input1=ctx, input2=e))
+            return await ctx.send(embed=embed_error(message, input1=ctx, input2=e))
         else:
             embed = discord.Embed(description=f'Module `{msg}` has been reloaded succesfully.', color=discord.Colour.purple())  
-            await ctx.send(embed=set_style(embed))
+            return await ctx.send(embed=set_style(embed))
+
+    @commands.command()
+    @commands.is_owner()
+    async def reloadall(self, ctx):
+        """ Reloads all extensions. """
+        error_collection = []
+        for file in os.listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                try:
+                    if os.path.exists(f'cogs/{name}.py'):
+                        self.bot.reload_extension(f'cogs.{name}')
+                    else:
+                        raise ImportError(f'No module named `{msg}.py`')
+                except Exception as e:
+                    message = f'Failed to reload module: `{msg}.py`: {e}'
+                    return await ctx.send(embed=embed_error(message, input1=ctx, input2=e))
+                else:
+                    pass
+        embed = discord.Embed(description='Successfully reloaded all extensions', color=discord.Colour.purple())  
+        await ctx.send(embed=set_style(embed))
 
     @commands.group(invoke_without_command=False)
     @commands.is_owner()
