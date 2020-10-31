@@ -82,7 +82,7 @@ intents = discord.Intents.all()
 description = '''Shuwy is a bot written by `Shunya#1624`. It implements basic moderation functions, automation and music.'''
 bot = commands.Bot(command_prefix = get_prefix, owner_id = 125345019199488000, case_insensitive = True, description = description, intents = intents)
 
-bot.version = '0.2.1'
+bot.version = '0.2.2'
 bot.color = 0xebb145
 bot.log =logging.getLogger('bot')
 
@@ -122,6 +122,21 @@ async def on_connect():
         message_id TEXT,
         channel_id TEXT,
         guild_id TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS music(
+        member_id TEXT,
+        favourite1 TEXT,
+        favourite2 TEXT,
+        favourite3 TEXT,
+        favourite4 TEXT,
+        favourite5 TEXT,
+        favourite6 TEXT,
+        favourite7 TEXT,
+        favourite8 TEXT,
+        favourite9 TEXT,
+        favourite10 TEXT,
         )
     ''')
 
