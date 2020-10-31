@@ -8,11 +8,15 @@ import random
 import re
 import typing
 import wavelink
+import sqlite3
+import os
 from discord.ext import commands, menus
 from utilities.embeds import embed_error, set_style
 
 # URL matching REGEX...
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
+
+database_path = os.path.join(f'{os.path.dirname(__file__)}', '../config', 'database.sqlite')
 
 class NoChannelProvided(commands.CommandError):
     '''Error raised when no suitable voice channel was supplied.'''
@@ -195,7 +199,7 @@ class InteractiveController(menus.Menu):
     async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel) -> discord.Message:
         return await channel.send(embed=self.embed)
 
-    @menus.button(emoji='\u25B6')
+    @menus.button(emoji='\N{BLACK RIGHT-POINTING TRIANGLE}')
     async def resume_command(self, payload: discord.RawReactionActionEvent):
         '''Resume button.'''
 
@@ -207,7 +211,7 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-    @menus.button(emoji='\u23F8')
+    @menus.button(emoji='\N{DOUBLE VERTICAL BAR}')
     async def pause_command(self, payload: discord.RawReactionActionEvent):
         '''Pause button'''
 
@@ -219,7 +223,7 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-    @menus.button(emoji='\u23F9')
+    @menus.button(emoji='\N{BLACK SQUARE FOR STOP}')
     async def stop_command(self, payload: discord.RawReactionActionEvent):
         '''Stop button.'''
 
@@ -230,7 +234,7 @@ class InteractiveController(menus.Menu):
 
         await self.bot.invoke(ctx) 
 
-    @menus.button(emoji='\u23ED')
+    @menus.button(emoji='\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}')
     async def skip_command(self, payload: discord.RawReactionActionEvent):
         '''Skip button.'''
 
@@ -242,7 +246,7 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-    @menus.button(emoji='\U0001F500')
+    @menus.button(emoji='\N{TWISTED RIGHTWARDS ARROWS}')
     async def shuffle_command(self, payload: discord.RawReactionActionEvent):
         '''Shuffle button.'''
 
@@ -254,7 +258,7 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-    @menus.button(emoji='\u2795')
+    @menus.button(emoji='\N{HEAVY PLUS SIGN}')
     async def volup_command(self, payload: discord.RawReactionActionEvent):
         '''Volume up button'''
 
@@ -266,7 +270,7 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-    @menus.button(emoji='\u2796')
+    @menus.button(emoji='\N{HEAVY MINUS SIGN}')
     async def voldown_command(self, payload: discord.RawReactionActionEvent):
         '''Volume down button.'''
 
@@ -278,13 +282,25 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-    @menus.button(emoji='\U0001F1F6')
+    @menus.button(emoji='\N{REGIONAL INDICATOR SYMBOL LETTER Q}')
     async def queue_command(self, payload: discord.RawReactionActionEvent):
         '''Player queue button.'''
 
         ctx = self.update_context(payload)
 
         command = self.bot.get_command('queue')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+        await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
+
+    @menus.button(emoji='\N{WHITE MEDIUM STAR}')
+    async def favourite_command(self, payload: discord.RawReactionActionEvent):
+        '''Mark as favourite button.'''
+
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('favoure')
         ctx.command = command
 
         await self.bot.invoke(ctx)
@@ -444,6 +460,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         return player.dj == ctx.author or ctx.author.guild_permissions.kick_members
 
     @commands.command()
+    @commands.guild_only()
     async def connect(self, ctx: commands.Context, *, channel: discord.VoiceChannel = None):
         '''Connect to a voice channel.'''
 
@@ -459,6 +476,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.connect(channel.id)
 
     @commands.command()
+    @commands.guild_only()
     async def play(self, ctx: commands.Context, *, query: str):
         '''Play or queue a song with the given query.'''
 
@@ -494,6 +512,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await player.do_next()
 
     @commands.command()
+    @commands.guild_only()
     async def pause(self, ctx: commands.Context):
         '''Pause the currently playing song.'''
 
@@ -522,6 +541,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
+    @commands.guild_only()
     async def resume(self, ctx: commands.Context):
         '''Resume a currently paused player.'''
 
@@ -550,6 +570,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
+    @commands.guild_only()
     async def skip(self, ctx: commands.Context):
         '''Skip the currently playing song.'''
 
@@ -585,6 +606,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command()
+    @commands.guild_only()
     async def stop(self, ctx: commands.Context):
         '''Stop the player and clear all internal states.'''
 
@@ -609,7 +631,140 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             embed = discord.Embed(description=f'{ctx.author.mention} has voted to stop the player.', color=discord.Colour.purple())  
             await ctx.send(embed=set_style(embed), delete_after=8)
 
+    @commands.command()
+    @commands.guild_only()
+    async def favoure(self, ctx: commands.Context):
+        '''Add the current song to your favourites'''
+
+        player: Player = self.bot.wavelink.get_player(guild_id=ctx.guild.id, cls=Player, context=ctx)
+
+        if not player.is_connected:
+            return
+
+        track = player.current
+        if not track:
+            return
+
+        member = ctx.author
+        database = sqlite3.connect(database_path)
+        cursor = database.cursor()
+        cursor.execute(f"SELECT EXISTS(SELECT 1 FROM music WHERE member_id = {member.id})")
+        if cursor.fetchone()[0] is 1:
+            # Check if the favourite list is full
+            cursor.execute(f"SELECT favourite10 FROM music WHERE member_id = {member.id}")
+            if cursor.fetchone()[0] is not None:
+                embed = discord.Embed(description='You have already reached the maximum number of favourites, please delete some before adding more.', color=discord.Colour.purple()) 
+                return await ctx.send(embed=set_style(embed))
+            found = False
+            favourite = "favourite"
+            number = 1
+            while (found == False and number <= 10 ):
+                string = favourite + str(number)
+                cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
+                result = cursor.fetchone()[0]
+                if result is None:
+                    sql = (f"UPDATE music SET {string} = ? WHERE member_id = ?")
+                    val = (track.uri, member.id)
+                    cursor.execute(sql, val)
+                    database.commit()
+                    cursor.close()
+                    database.close()
+                    found = True
+                    embed = discord.Embed(description=f"The song {track.title} has been added to your favourites.", color=discord.Colour.purple()) 
+                    return await ctx.send(embed=set_style(embed))
+                else:
+                    if result == track.uri:
+                        embed = discord.Embed(description='This song is already in your favourite list!', color=discord.Colour.purple()) 
+                        return await ctx.send(embed=set_style(embed))
+                    number += 1
+        else:
+            sql = ('INSERT INTO music(member_id, favourite1) VALUES(?, ?)')
+            val = (member.id, track.uri)
+            cursor.execute(sql, val)
+            database.commit()
+            cursor.close()
+            database.close()
+            embed = discord.Embed(description=f"The song {track.title} has been added to your favourites.", color=discord.Colour.purple())  
+            return await ctx.send(embed=set_style(embed))
+        
+    @commands.command(aliases=['pfav', 'playfav'])
+    @commands.guild_only()
+    async def play_favourites(self, ctx: commands.Context):
+        '''Queues your list of favourite songs'''
+
+        player: Player = self.bot.wavelink.get_player(guild_id=ctx.guild.id, cls=Player, context=ctx)
+
+        if not player.is_connected:
+            await ctx.invoke(self.connect)
+
+        member = ctx.author
+        database = sqlite3.connect(database_path)
+        cursor = database.cursor()
+        last = False
+        number = 1
+        while (last == False and number <= 10):
+            string = "favourite" + str(number)
+            cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
+            url = cursor.fetchone()[0]
+            if url is None:
+                last = True
+            else:
+                trackObj = await self.bot.wavelink.get_tracks(url)
+                track = Track(trackObj[0].id, trackObj[0].info, requester=ctx.author)
+                embed = discord.Embed(description=f'Added {track.title} to the Queue', color=discord.Colour.purple())  
+                await ctx.send(embed=set_style(embed), delete_after=8)
+                await player.queue.put(track)
+
+                if not player.is_playing:
+                    await player.do_next()
+            number += 1
+
+    @commands.command(aliases=['favs', 'showfav'])
+    @commands.guild_only()
+    async def favourites(self, ctx: commands.Context):
+        member = ctx.author
+        database = sqlite3.connect(database_path)
+        cursor = database.cursor()
+        last = False
+        number = 1
+        entries = []
+        while (last == False and number <= 10):
+            string = "favourite" + str(number)
+            cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
+            url = cursor.fetchone()[0]
+            if url is None:
+                last = True
+            else:
+                trackObj = await self.bot.wavelink.get_tracks(url)
+                track = Track(trackObj[0].id, trackObj[0].info, requester=ctx.author)
+                entries.append(track)
+            number += 1
+        titles = [track.title for track in entries]
+        pages = PaginatorSource(entries=entries)
+        paginator = menus.MenuPages(source=pages, timeout=None, delete_message_after=True)
+        await paginator.start(ctx)
+
+    @commands.command(aliases=['dfav', 'delfav'])
+    @commands.guild_only()
+    async def delete_fav(self, ctx: commands.Context, *, index: int):
+        member = ctx.author
+        database = sqlite3.connect(database_path)
+        cursor = database.cursor()
+        while (index < 10):
+            string = "favourite" + str(index)
+            stringNext = "favourite" + str(index + 1)
+            cursor.execute(f"UPDATE music SET {string} = {stringNext} WHERE member_id = {member.id}")
+            index += 1
+        cursor.execute(f"UPDATE music SET {string} = null WHERE  member_id = {member.id}")
+        database.commit()
+        cursor.close()
+        database.close()
+        embed = discord.Embed(description='Removed a track from your favourite list.', color=discord.Colour.purple())  
+        return await ctx.send(embed=set_style(embed), delete_after=8)
+
+
     @commands.command(aliases=['v', 'vol'])
+    @commands.guild_only()
     async def volume(self, ctx: commands.Context, *, vol: int):
         '''Change the players volume, between 1 and 100.'''
 
@@ -631,6 +786,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(aliases=['mix'])
+    @commands.guild_only()
     async def shuffle(self, ctx: commands.Context):
         '''Shuffle the players queue.'''
 
@@ -662,6 +818,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.send(embed=set_style(embed), delete_after=8)
 
     @commands.command(hidden=True)
+    @commands.guild_only()
     async def vol_up(self, ctx: commands.Context):
         '''Command used for volume up button.'''
 
@@ -680,6 +837,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.set_volume(vol)
 
     @commands.command(hidden=True)
+    @commands.guild_only()
     async def vol_down(self, ctx: commands.Context):
         '''Command used for volume down button.'''
 
@@ -698,6 +856,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.set_volume(vol)
 
     @commands.command(aliases=['eq'])
+    @commands.guild_only()
     async def equalizer(self, ctx: commands.Context, *, equalizer: str):
         '''Change the players equalizer.'''
 
@@ -727,6 +886,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.set_eq(eq)
 
     @commands.command(aliases=['q', 'que'])
+    @commands.guild_only()
     async def queue(self, ctx: commands.Context):
         '''Display the players queued songs.'''
 
@@ -746,6 +906,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await paginator.start(ctx)
 
     @commands.command(aliases=['np', 'now_playing', 'current'])
+    @commands.guild_only()
     async def nowplaying(self, ctx: commands.Context):
         '''Update the player controller.'''
 
@@ -757,6 +918,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         await player.invoke_controller()
 
     @commands.command(aliases=['swap'])
+    @commands.guild_only()
     async def swap_dj(self, ctx: commands.Context, *, member: discord.Member = None):
         '''Swap the current DJ to another member in the voice channel.'''
 

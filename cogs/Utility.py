@@ -512,9 +512,9 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
                     if os.path.exists(f'cogs/{name}.py'):
                         self.bot.reload_extension(f'cogs.{name}')
                     else:
-                        raise ImportError(f'No module named `{msg}.py`')
+                        raise ImportError(f'No module named `{name}.py`')
                 except Exception as e:
-                    message = f'Failed to reload module: `{msg}.py`: {e}'
+                    message = f'Failed to reload module: `{name}.py`: {e}'
                     return await ctx.send(embed=embed_error(message, input1=ctx, input2=e))
                 else:
                     pass
@@ -581,6 +581,7 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         await ctx.send(embed=set_style(embed))
 
     @commands.command(hidden=False)
+    @commands.guild_only()
     async def invite(self, ctx, channel:discord.TextChannel):
         '''Creates an invite link for the channel.
 
@@ -598,7 +599,7 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         if ctx.guild is None:
             self.bot.log.info(f'Command was called for execution in a private message     Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}')
         else:
-            self.bot.log.info(f'Command was called for execution in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.name} | Guild Name: {ctx.guild.id}')
+            self.bot.log.info(f'Command was called for execution in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.id} | Guild Name: {ctx.guild.name}')
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
@@ -608,7 +609,7 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         if ctx.guild is None:
             self.bot.log.info(f'Command was executed correctly in a private message     Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}')
         else:
-            self.bot.log.info(f'Command was execute correctly in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.name} | Guild Name: {ctx.guild.id}')
+            self.bot.log.info(f'Command was execute correctly in a guild      Name: {ctx.prefix}{ctx.command} | Invoker ID: {ctx.author.id}  | Guild ID: {ctx.guild.id} | Guild Name: {ctx.guild.name}')
 
 def setup(bot):
     bot.add_cog(UtilityCog(bot))

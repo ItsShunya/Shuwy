@@ -1,3 +1,5 @@
-#Wavelink
+# discord.py and Wavelink requirements
 aiohttp>=3.6.0,<3.7.0
-discord.py>=1.2.5
+
+# Necessary due to the use of intents starting on October 7th
+discord.py>=1.5.1

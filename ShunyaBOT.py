@@ -82,7 +82,7 @@ intents = discord.Intents.all()
 description = '''Shuwy is a bot written by `Shunya#1624`. It implements basic moderation functions, automation and music.'''
 bot = commands.Bot(command_prefix = get_prefix, owner_id = 125345019199488000, case_insensitive = True, description = description, intents = intents)
 
-bot.version = '0.0.7'
+bot.version = '0.2.2'
 bot.color = 0xebb145
 bot.log =logging.getLogger('bot')
 
@@ -124,6 +124,22 @@ async def on_connect():
         guild_id TEXT
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS music(
+        member_id TEXT,
+        favourite1 TEXT,
+        favourite2 TEXT,
+        favourite3 TEXT,
+        favourite4 TEXT,
+        favourite5 TEXT,
+        favourite6 TEXT,
+        favourite7 TEXT,
+        favourite8 TEXT,
+        favourite9 TEXT,
+        favourite10 TEXT,
+        )
+    ''')
+
     database.commit()
     cursor.close()
     database.close()
@@ -138,6 +154,19 @@ async def on_guild_join(guild):
     sql = ('INSERT INTO database(guild_id, welcome_channel_on, welcome_role_on) VALUES(?, ?, ?)')
     val = (guild.id, 0, 0)
     cursor.execute(sql, val)
+    database.commit()
+    cursor.close()
+    database.close()
+
+@bot.event
+async def on_guild_remove(guild):
+    '''Event that takes place when the bot leaves a server.
+       Removes the previously created server parameters in the database.'''
+
+    database = sqlite3.connect(database_path)
+    cursor = database.cursor()
+    sql = ('DELETE FROM database WHERE guild_id = ?')
+    cursor.execute(sql, (guild.id, ))
     database.commit()
     cursor.close()
     database.close()
