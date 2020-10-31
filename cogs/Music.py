@@ -8,15 +8,14 @@ import random
 import re
 import typing
 import wavelink
-import sqlite3
-import os
+import aiosqlite
+
 from discord.ext import commands, menus
 from utilities.embeds import embed_error, set_style
+from utilities.db import *
 
 # URL matching REGEX...
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
-
-database_path = os.path.join(f'{os.path.dirname(__file__)}', '../config', 'database.sqlite')
 
 class NoChannelProvided(commands.CommandError):
     '''Error raised when no suitable voice channel was supplied.'''
@@ -646,13 +645,13 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             return
 
         member = ctx.author
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        cursor.execute(f"SELECT EXISTS(SELECT 1 FROM music WHERE member_id = {member.id})")
+        database = await db_connect()
+        cursor = await database.cursor()
+        await cursor.execute(f"SELECT EXISTS(SELECT 1 FROM music WHERE member_id = {member.id})")
         if cursor.fetchone()[0] is 1:
             # Check if the favourite list is full
-            cursor.execute(f"SELECT favourite10 FROM music WHERE member_id = {member.id}")
-            if cursor.fetchone()[0] is not None:
+            await cursor.execute(f"SELECT favourite10 FROM music WHERE member_id = {member.id}")
+            if await cursor.fetchone()[0] is not None:
                 embed = discord.Embed(description='You have already reached the maximum number of favourites, please delete some before adding more.', color=discord.Colour.purple()) 
                 return await ctx.send(embed=set_style(embed))
             found = False
@@ -660,15 +659,15 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             number = 1
             while (found == False and number <= 10 ):
                 string = favourite + str(number)
-                cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
+                await cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
                 result = cursor.fetchone()[0]
                 if result is None:
                     sql = (f"UPDATE music SET {string} = ? WHERE member_id = ?")
                     val = (track.uri, member.id)
-                    cursor.execute(sql, val)
-                    database.commit()
-                    cursor.close()
-                    database.close()
+                    await cursor.execute(sql, val)
+                    await database.commit()
+                    await cursor.close()
+                    await database.close()
                     found = True
                     embed = discord.Embed(description=f"The song {track.title} has been added to your favourites.", color=discord.Colour.purple()) 
                     return await ctx.send(embed=set_style(embed))
@@ -680,10 +679,10 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         else:
             sql = ('INSERT INTO music(member_id, favourite1) VALUES(?, ?)')
             val = (member.id, track.uri)
-            cursor.execute(sql, val)
-            database.commit()
-            cursor.close()
-            database.close()
+            await cursor.execute(sql, val)
+            await database.commit()
+            await cursor.close()
+            await database.close()
             embed = discord.Embed(description=f"The song {track.title} has been added to your favourites.", color=discord.Colour.purple())  
             return await ctx.send(embed=set_style(embed))
         
@@ -698,14 +697,14 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             await ctx.invoke(self.connect)
 
         member = ctx.author
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
+        database = await db_connect()
+        cursor = await database.cursor()
         last = False
         number = 1
         while (last == False and number <= 10):
             string = "favourite" + str(number)
-            cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
-            url = cursor.fetchone()[0]
+            await cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
+            url = await cursor.fetchone()[0]
             if url is None:
                 last = True
             else:
@@ -723,14 +722,14 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
     @commands.guild_only()
     async def favourites(self, ctx: commands.Context):
         member = ctx.author
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
+        database = await db_connect()
+        cursor = await database.cursor()
         last = False
         number = 1
         entries = []
         while (last == False and number <= 10):
             string = "favourite" + str(number)
-            cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
+            await cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
             url = cursor.fetchone()[0]
             if url is None:
                 last = True
@@ -748,17 +747,17 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
     @commands.guild_only()
     async def delete_fav(self, ctx: commands.Context, *, index: int):
         member = ctx.author
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
+        database = await db_connect()
+        cursor = await database.cursor()
         while (index < 10):
             string = "favourite" + str(index)
             stringNext = "favourite" + str(index + 1)
-            cursor.execute(f"UPDATE music SET {string} = {stringNext} WHERE member_id = {member.id}")
+            await cursor.execute(f"UPDATE music SET {string} = {stringNext} WHERE member_id = {member.id}")
             index += 1
-        cursor.execute(f"UPDATE music SET {string} = null WHERE  member_id = {member.id}")
-        database.commit()
-        cursor.close()
-        database.close()
+        await cursor.execute(f"UPDATE music SET {string} = null WHERE  member_id = {member.id}")
+        await database.commit()
+        await cursor.close()
+        await database.close()
         embed = discord.Embed(description='Removed a track from your favourite list.', color=discord.Colour.purple())  
         return await ctx.send(embed=set_style(embed), delete_after=8)
 

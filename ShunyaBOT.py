@@ -4,7 +4,6 @@ import logging
 import logging.handlers
 import sys, traceback
 import contextlib
-import sqlite3
 import os
 import platform
 import dotenv
@@ -14,6 +13,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from discord.ext import commands
 from utilities.embeds import embed_error, set_style
+from utilities.db import create_tables, add_guild, remove_guild
 
 # This program requires the use of Python 3.6 or higher due to the use of f-strings.
 # Compatibility with Python 3.5 is possible if f-strings are removed.
@@ -25,7 +25,7 @@ if sys.version_info[1] < 6 or sys.version_info[0] < 3:
 dotenv_path = os.path.join(f'{os.path.dirname(sys.argv[0])}/config', '.env')
 load_dotenv(dotenv_path)
 token = os.getenv('DISCORD_TOKEN')
-database_path = os.path.join(f'{os.path.dirname(sys.argv[0])}/config', 'database.sqlite')
+version = os.getenv('VERSION')
 
 @contextlib.contextmanager # No need to define __enter__() and __exit__() methods.
 def logger():
@@ -82,8 +82,7 @@ intents = discord.Intents.all()
 description = '''Shuwy is a bot written by `Shunya#1624`. It implements basic moderation functions, automation and music.'''
 bot = commands.Bot(command_prefix = get_prefix, owner_id = 125345019199488000, case_insensitive = True, description = description, intents = intents)
 
-bot.version = '0.2.2'
-bot.color = 0xebb145
+bot.version = version
 bot.log =logging.getLogger('bot')
 
 @bot.event
@@ -103,73 +102,21 @@ async def on_connect():
                 print(f'Could not load extension: {e}')
     print('Finished loading Cogs.')
     print('-------------------------------')
-    database = sqlite3.connect(database_path)
-    cursor = database.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS database(
-        guild_id TEXT,
-        welcome_msg TEXT,
-        welcome_channel_id TEXT,
-        welcome_channel_on INTEGER,
-        welcome_role_id TEXT,
-        welcome_role_on INTEGER
-        )
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS reaction(
-        emoji TEXT,
-        role TEXT,
-        message_id TEXT,
-        channel_id TEXT,
-        guild_id TEXT
-        )
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS music(
-        member_id TEXT,
-        favourite1 TEXT,
-        favourite2 TEXT,
-        favourite3 TEXT,
-        favourite4 TEXT,
-        favourite5 TEXT,
-        favourite6 TEXT,
-        favourite7 TEXT,
-        favourite8 TEXT,
-        favourite9 TEXT,
-        favourite10 TEXT,
-        )
-    ''')
-
-    database.commit()
-    cursor.close()
-    database.close()
+    await create_tables()
 
 @bot.event
 async def on_guild_join(guild):
     '''Event that takes place when the bot joins a server.
        Initializes the necessary server parameters in the database.'''
 
-    database = sqlite3.connect(database_path)
-    cursor = database.cursor()
-    sql = ('INSERT INTO database(guild_id, welcome_channel_on, welcome_role_on) VALUES(?, ?, ?)')
-    val = (guild.id, 0, 0)
-    cursor.execute(sql, val)
-    database.commit()
-    cursor.close()
-    database.close()
+    add_guild(guild)
 
 @bot.event
 async def on_guild_remove(guild):
     '''Event that takes place when the bot leaves a server.
        Removes the previously created server parameters in the database.'''
 
-    database = sqlite3.connect(database_path)
-    cursor = database.cursor()
-    sql = ('DELETE FROM database WHERE guild_id = ?')
-    cursor.execute(sql, (guild.id, ))
-    database.commit()
-    cursor.close()
-    database.close()
+    remove_guild(guild)
 
 @bot.event
 async def on_ready():
@@ -183,7 +130,7 @@ async def on_ready():
     print('-------------------------------')
 
     # TO-DO: Change the following line to not include it in the on_ready event. 
-    await bot.change_presence(activity=discord.Activity(name=f'on {len(bot.guilds)} servers', type=1))
+    await bot.change_presence(activity=discord.Activity(name=f'!help for info', type=1))
     print(f'Successfully logged in and booted!')
 
 if __name__ == '__main__':
