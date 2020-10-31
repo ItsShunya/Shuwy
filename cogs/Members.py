@@ -1,12 +1,10 @@
-import sqlite3
 import re
-import os
 import datetime
 import discord
+
 from discord.ext import commands
 from utilities.embeds import *
-
-database_path = os.path.join(f'{os.path.dirname(__file__)}', '../config', 'database.sqlite')
+from utilities.db import *
 
 class MembersCog(commands.Cog, name='Members'):
     '''Cog in charge of the functions related to members, roles and permissions.'''
@@ -58,13 +56,14 @@ class MembersCog(commands.Cog, name='Members'):
         await ctx.send(content=None, embed=set_style(embed))
 
     @commands.group(invoke_without_commands=True)
+    @commands.has_permissions(manage_messages=True)
     async def welcome(self, ctx):
         '''Sets the preferences for the welcome channel/message/role.
            Needs to be used together with one of its subcommands.'''
 
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(color=discord.Colour.purple(), title='Available Commands:', description='welcome channel <#channel>\nwelcome text <message>\nwelcome role <@role>\nwelcome channel_on\nwelcome channel_off\nwelcome role_on\nwelcome role_off')
-            await ctx.send(embed=set_style(embed))
+            return await ctx.send(embed=set_style(embed))
 
     @welcome.command()
     async def channel(self, ctx, channel:discord.TextChannel):
@@ -73,22 +72,10 @@ class MembersCog(commands.Cog, name='Members'):
         Keyword arguments:
         channel -- channel to be used for welcome messages'''
 
-        if ctx.message.author.guild_permissions.manage_messages:
-            database = sqlite3.connect(database_path)
-            cursor = database.cursor()
-            cursor.execute(f"SELECT welcome_channel_id FROM database WHERE guild_id = {ctx.guild.id}")
-            result = cursor.fetchone()
-            sql = ("UPDATE database SET welcome_channel_id = ? WHERE guild_id = ?")
-            val = (channel.id, ctx.guild.id)
-            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Channel has been set to {channel.mention}')
-            await ctx.send(embed=set_style(embed))
-            cursor.execute(sql, val)
-            database.commit()
-            cursor.close()
-            database.close()
-        else:
-            await ctx.send(embed=embed_error('You do not have permissions to use this command. Contact an admin for more information.', input1=ctx))
-
+        await set_welcome_channel(channel.id, ctx.guild.id)
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Channel has been set to {channel.mention}')
+        return await ctx.send(embed=set_style(embed))
+ 
     @welcome.command()
     async def text(self, ctx, *, text):
         '''Subcommand to set the welcome message.
@@ -96,23 +83,10 @@ class MembersCog(commands.Cog, name='Members'):
         Keyword arguments:
         text -- message to be used as welcome messages'''
 
-        if ctx.message.author.guild_permissions.manage_messages:
-            database = sqlite3.connect(database_path)
-            cursor = database.cursor()
-            print(os.getcwd())
-            cursor.execute(f"SELECT welcome_msg FROM database WHERE guild_id = {ctx.guild.id}")
-            result = cursor.fetchone()
-            sql = ("UPDATE database SET welcome_msg = ? WHERE guild_id = ?")
-            val = (text, ctx.guild.id)
-            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Message has been set to `{text}`')
-            await ctx.send(embed=set_style(embed))
-            cursor.execute(sql, val)
-            database.commit()
-            cursor.close()
-            database.close()
-        else:
-            await ctx.send(embed=embed_error('You do not have permissions to use this command. Contact an admin for more information.', input1=ctx))
-
+        await set_welcome_message(text, ctx.guild.id)
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Message has been set to `{text}`')
+        return await ctx.send(embed=set_style(embed))
+   
     @welcome.command()
     async def role(self, ctx, role:discord.Role):
         '''Subcommand to set the welcome role.
@@ -120,79 +94,41 @@ class MembersCog(commands.Cog, name='Members'):
         Keyword arguments:
         role -- role to be set to new server members'''
 
-        if ctx.message.author.guild_permissions.manage_roles:
-            database = sqlite3.connect(database_path)
-            cursor = database.cursor()
-            sql = ("UPDATE database SET welcome_role_id = ? WHERE guild_id = ?")
-            val = (role.id, ctx.guild.id)
-            embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Role has been set to {role.mention}')
-            await ctx.send(embed=set_style(embed))
-            cursor.execute(sql, val)
-            database.commit()
-            cursor.close()
-            database.close()
-        else:
-            await ctx.send(embed=embed_error('You do not have permissions to use this command. Contact an admin for more information.', input1=ctx))
-
+        await set_welcome_role(role.id, ctx.guild.id)
+        embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Role has been set to {role.mention}')
+        return await ctx.send(embed=set_style(embed))
+          
     @welcome.command()
     async def channel_on(self, ctx):
         '''Subcommand to activate the welcome message.'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        sql = ("UPDATE database SET welcome_channel_on = ? WHERE guild_id = ?")
-        val = (1, ctx.guild.id)
-        cursor.execute(sql, val)
+        await welcome_message_switch(1, ctx.guild.id)
         embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been activated.')
-        await ctx.send(embed=set_style(embed))
-        database.commit()
-        cursor.close()
-        database.close()
+        return await ctx.send(embed=set_style(embed))
 
     @welcome.command()
     async def channel_off(self, ctx):
         '''Subcommand to deactivate the welcome message.'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        sql = ("UPDATE database SET welcome_channel_on = ? WHERE guild_id = ?")
-        val = (0, ctx.guild.id)
-        cursor.execute(sql, val)
+        await welcome_message_switch(0, ctx.guild.id)
         embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been deactivated.')
-        await ctx.send(embed=set_style(embed))
-        database.commit()
-        cursor.close()
-        database.close()
+        return await ctx.send(embed=set_style(embed))
 
     @welcome.command()
     async def role_on(self, ctx):
         '''Subcommand to activate the welcome role.'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        sql = ("UPDATE database SET welcome_role_on = ? WHERE guild_id = ?")
-        val = (1, ctx.guild.id)
-        cursor.execute(sql, val)
+        await welcome_role_switch(1, ctx.guild.id)
         embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Role has been activated.')
-        await ctx.send(embed=set_style(embed))
-        database.commit()
-        cursor.close()
-        database.close()
+        return await ctx.send(embed=set_style(embed))
 
     @welcome.command()
     async def role_off(self, ctx):
         '''Subcommand to deactivate the welcome role.'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        sql = ("UPDATE database SET welcome_role_on = ? WHERE guild_id = ?")
-        val = (0, ctx.guild.id)
-        cursor.execute(sql, val)
-        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Channel has been deactivated.')
-        await ctx.send(embed=set_style(embed))
-        database.commit()
-        cursor.close()
-        database.close()
+        welcome_role_switch(0, ctx.guild.id)
+        embed = discord.Embed(color=discord.Colour.purple(), description='Welcome Role has been deactivated.')
+        return await ctx.send(embed=set_style(embed))
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -200,21 +136,16 @@ class MembersCog(commands.Cog, name='Members'):
            Here we will read the database and assign the member the necessary settings. '''
 
         guild = member.guild
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        cursor.execute(f"SELECT welcome_channel_on FROM database WHERE guild_id = {guild.id}")
-        result0 = cursor.fetchone()
+        result0 = await get_welcome_channel_switch(member.guild.id)
         if result0[0] is 1:
-            cursor.execute(f"SELECT welcome_channel_id FROM database WHERE guild_id = {guild.id}")
-            result = cursor.fetchone()
+            result = await get_welcome_channel_id(member.guild.id)
             if result[0] is None:
                 if guild.system_channel is not None:
-                    sql = ("UPDATE database SET welcome_channel_id = ? WHERE guild_id = ?")
+                    sql = ("UPDATE welcome SET welcome_channel_id = ? WHERE guild_id = ?")
                     val = (guild.system_channel.id, guild.id)
-                    cursor.execute(sql, val)
+                    await cursor.execute(sql, val)
                     channel = discord.utils.get(guild.text_channels, id=guild.system_channel.id)
-                    cursor.execute(f"SELECT welcome_msg FROM database WHERE guild_id = {guild.id}")
-                    result1 = cursor.fetchone()
+                    result1 = await get_welcome_message(member.guild.id)
                     if result1[0] is None:
                         msg = 'Hello {mention}! Welcome to {guild}'
                         await channel.send(embed=embed_welcome(msg, member))
@@ -224,44 +155,39 @@ class MembersCog(commands.Cog, name='Members'):
                     return
             else:
                 channel = discord.utils.get(guild.text_channels, id=int(result[0]))
-                cursor.execute(f"SELECT welcome_msg FROM database WHERE guild_id = {guild.id}")
-                result1 = cursor.fetchone()
+                result1 = await get_welcome_message(member.guild.id)
                 if result1[0] is None:
                     msg = 'Hello {mention}! Welcome to {guild}'
                     await channel.send(embed=embed_welcome(msg, member))
                 else:
                     await channel.send(embed=embed_welcome(str(result1[0]), member))
-        cursor.execute(f"SELECT welcome_role_on FROM database WHERE guild_id = {guild.id}")
-        result2 = cursor.fetchone()
+        result2 = await get_welcome_role_switch(member.guild.id)
         if result2[0] is 1:
-            cursor.execute(f"SELECT welcome_role_id FROM database WHERE guild_id = {guild.id}")
-            database.commit()
-            result3 = cursor.fetchone()
+            result3 = await get_welcome_role_id(member.guild.id)
             if result3[0] is None:
                 role_Name = 'New Member'
                 await guild.create_role(name=role_Name)
                 role = discord.utils.get(guild.roles, name = role_Name)
-                sql = ("UPDATE database SET welcome_role_id = ? WHERE guild_id = ?")
+                sql = ("UPDATE welcome SET welcome_role_id = ? WHERE guild_id = ?")
                 val = (role.id, guild.id)
-                cursor.execute(sql, val)
-                database.commit()
+                await cursor.execute(sql, val)
+                await database.commit()
                 await member.add_roles(role)
             else:
                 role = guild.get_role(role_id=int(result3[0]))
                 await member.add_roles(role)
-        database.commit()
-        cursor.close()
-        database.close()
+        await commit_and_close(database, cursor)
+
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, reaction):
         '''Event that takes places when a reaction is added to a message.'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
+        database = await db_connect()
+        cursor = await database.cursor()
         if '<:' in str(reaction.emoji):
-            cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji.id}'")
-            result = cursor.fetchone()
+            await cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji.id}'")
+            result = await cursor.fetchone()
             guild = self.bot.get_guild(reaction.guild_id)
             if str(reaction.emoji.id) in str(result[0]):
                 on = discord.utils.get(guild.roles, id=int(result[1]))
@@ -270,8 +196,8 @@ class MembersCog(commands.Cog, name='Members'):
             else:
                 return
         else:
-            cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji}'")
-            result = cursor.fetchone()
+            await cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji}'")
+            result = await cursor.fetchone()
             guild = self.bot.get_guild(reaction.guild_id)
             if result is not None:
                 on = discord.utils.get(guild.roles, id=int(result[1]))
@@ -279,19 +205,19 @@ class MembersCog(commands.Cog, name='Members'):
                 await user.add_roles(on)
             else:
                 return
-        database.commit()
-        cursor.close()
-        database.close()
+        await database.commit()
+        await cursor.close()
+        await database.close()
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, reaction):
         '''Event that takes places when a reaction is deleted from a message.'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
+        database = await db_connect()
+        cursor = await database.cursor()
         if '<:' in str(reaction.emoji):
-            cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji.id}'")
-            result = cursor.fetchone()
+            await cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji.id}'")
+            result = await cursor.fetchone()
             guild = self.bot.get_guild(reaction.guild_id)
             if str(reaction.emoji.id) in str(result[0]):
                 on = discord.utils.get(guild.roles, id=int(result[1]))
@@ -300,8 +226,8 @@ class MembersCog(commands.Cog, name='Members'):
             else:
                 return
         else:
-            cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji}'")
-            result = cursor.fetchone()
+            await cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{reaction.guild_id}' and message_id = '{reaction.message_id}' and emoji = '{reaction.emoji}'")
+            result = await cursor.fetchone()
             guild = self.bot.get_guild(reaction.guild_id)
             if result is not None:
                 on = discord.utils.get(guild.roles, id=int(result[1]))
@@ -309,9 +235,9 @@ class MembersCog(commands.Cog, name='Members'):
                 await user.remove_roles(on)
             else:
                 return
-        database.commit()
-        cursor.close()
-        database.close()
+        await database.commit()
+        await cursor.close()
+        await database.close()
 
     @commands.command()
     async def role_add(self, ctx, channel:discord.TextChannel, messageid, emoji, role:discord.Role):
@@ -323,16 +249,16 @@ class MembersCog(commands.Cog, name='Members'):
         emoji -- emoji to be used
         role -- role to be added to the user'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}'")
-        result = cursor.fetchone()
+        database = await db_connect()
+        cursor = await database.cursor()
+        await cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}'")
+        result = await cursor.fetchone()
         if '<:' in emoji:
             emm = re.sub(':.*?', '', emoji).strip('<>')
             if result is None or str(message_id) not in str(result[3]):
                 sql = ("INSERT INTO reaction(emoji, role, message_id, channel_id, guild_id) VALUES(?,?,?,?,?)")
                 val = (emm, role.id, messageid, channel.id, ctx.guild.id)
-                cursor.execute(sql, val)
+                await cursor.execute(sql, val)
                 msg = await channel.fetch_message(messageid)
                 em = self.bot.get_emoji(int(emm))
                 await msg.add_reaction(em)
@@ -340,12 +266,12 @@ class MembersCog(commands.Cog, name='Members'):
             if result is None or str(message_id) not in str(result[3]):
                 sql = ("INSERT INTO reaction(emoji, role, message_id, channel_id, guild_id) VALUES(?,?,?,?,?)")
                 val = (emoji, role.id, messageid, channel.id, ctx.guild.id)
-                cursor.execute(sql, val)
+                await cursor.execute(sql, val)
                 msg = await channel.fetch_message(messageid)
                 await msg.add_reaction(emoji)
-        database.commit()
-        cursor.close()
-        database.close()
+        await database.commit()
+        await cursor.close()
+        await database.close()
 
     @commands.command()
     async def role_remove(self, ctx, messageid=None, emoji=None):
@@ -355,16 +281,16 @@ class MembersCog(commands.Cog, name='Members'):
         messageid -- ID of the message where the bot had reacted
         emoji -- emoji used'''
 
-        database = sqlite3.connect(database_path)
-        cursor = database.cursor()
-        cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}'")
-        result = cursor.fetchone()
+        database = await db_connect()
+        cursor = await database.cursor()
+        await cursor.execute(f"SELECT emoji, role, message_id, channel_id FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}'")
+        result = await cursor.fetchone()
         if '<:' in emoji:
             emm = re.sub(':.*?', '', emoji).strip('<>')
             if result is None:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
             elif str(messageid) in str(result[2]):
-                cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emm}'")
+                await cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emm}'")
                 embed = discord.Embed(description='Reaction has been removed.', color=discord.Colour.purple())  
                 await ctx.send(embed=set_style(embed))
             else:
@@ -373,14 +299,14 @@ class MembersCog(commands.Cog, name='Members'):
             if result is None:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
             elif str(messageid) in str(result[2]):
-                cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emoji}'")
+                await cursor.execute(f"DELETE FROM reaction WHERE guild_id = '{ctx.message.guild.id}' and message_id = '{messageid}' and emoji = '{emoji}'")
                 embed = discord.Embed(description='Reaction has been removed.', color=discord.Colour.purple())  
                 await ctx.send(embed=set_style(embed))
             else:
                 await ctx.send(embed=embed_error('That reaction was not found on that message.', input1=ctx))
-        database.commit()
-        cursor.close()
-        database.close()
+        await database.commit()
+        await cursor.close()
+        await database.close()
 
     async def cog_check(self, ctx: commands.Context):
         '''Cog wide check, which disallows commands in DMs.'''
