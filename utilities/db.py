@@ -158,3 +158,16 @@ async def get_welcome_role_id(guildID):
     result = await cursor.fetchone()
     await closeAll(database, cursor)
     return result
+
+# Returns all guild IDs in the database
+async def get_guilds():
+    database = await db_connect()
+    cursor = await database.cursor()
+    await cursor.execute("SELECT guild_id FROM welcome")
+    fetched = await cursor.fetchall()
+    print(fetched)
+    await closeAll(database, cursor)
+    guilds = []
+    for guild in fetched:
+        guilds.append(guild[0])
+    return guilds
