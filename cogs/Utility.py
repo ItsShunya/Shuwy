@@ -2,8 +2,10 @@ import discord
 import os
 import platform
 import asyncio
+
 from discord.ext import commands
 from utilities.embeds import embed_error, set_style
+from utilities.db import get_guilds
 
 class HelpCommand(commands.HelpCommand):
 
@@ -521,6 +523,18 @@ class UtilityCog(commands.Cog, name='Utility', command_attrs=dict(hidden=True)):
         embed = discord.Embed(description='Successfully reloaded all extensions', color=discord.Colour.purple())  
         await ctx.send(embed=set_style(embed))
 
+    @commands.command()
+    @commands.is_owner()
+    async def send_updates(self, ctx, *, message):
+        '''Sends the newest information about the bot's updates to all owners of servers where the bot is.
+           Only use on major updates.'''
+        guilds = await get_guilds()
+        embed = discord.Embed(title=f'Thanks for using Shuwy!', description=message, color=discord.Colour.purple())
+        helpervar = 0
+        while helpervar < len(guilds):
+            await get_guild(guilds[helpervar]).owner.send(embed = set_style(embed))
+            helpervar += 1
+        
     @commands.group(invoke_without_command=False)
     @commands.is_owner()
     async def status(self, ctx):
