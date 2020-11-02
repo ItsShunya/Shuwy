@@ -102,7 +102,7 @@ async def on_connect():
                 print(f'Could not load extension: {e}')
     print('Finished loading Cogs.')
     print('-------------------------------')
-    await create_tables()
+    return await create_tables()
 
 @bot.event
 async def on_guild_join(guild):
@@ -110,6 +110,15 @@ async def on_guild_join(guild):
        Initializes the necessary server parameters in the database.'''
 
     add_guild(guild)
+    message='To get started with the bot, try using some of its cool features:'
+    embed = discord.Embed(title=f'Thanks for using Shuwy,  {guild.owner.name}!', description=message, color=discord.Colour.purple())
+    embed.add_field(name='!help', value='`-Displays all the commands and how to use them`', inline=False)
+    embed.add_field(name='!play <song name>', value='`-Plays the song and displays a cool responsive music player (pause, stop, skip, favourite)`', inline=False)
+    embed.add_field(name='!welcome <text>', value='`-Set the welcome message`', inline=False)
+    embed.add_field(name='!role_add <channel> <messageid> <emoji> <role>', value='`-Sets a role to be added to a user when he reacts to a pre-defined message with a pre-defined role.`', inline=False)
+    embed.add_field(name="If you'd like some custom features, or want to report an issue please leave a comment here:", value="https://github.com/Shunya-sama/Shuwy/issues", inline=False)
+    join_message = set_style(embed)
+    return await guild.owner.send(embed = join_message)
 
 @bot.event
 async def on_guild_remove(guild):
