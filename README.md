@@ -68,7 +68,7 @@ Trying to choose a suitable bot for some general project discords was always a t
 
 ### Built With
 
-* [Python 3](https://www.python.org/)
+* [Python 3.7](https://www.python.org/)
 * [discord.py](https://github.com/Rapptz/discord.py)
 * [Lavalink](https://github.com/Frederikam/Lavalink)
 * [Wavelink](https://github.com/PythonistaGuild/Wavelink)
@@ -85,8 +85,11 @@ I developed Shuwy for my personal use, but in case you want to set up your own l
 
 ### Prerequisites
 
-*IN CONSTRUCTION*
-```
+ 1. Make sure you have Python 3.7 installed, otherwise get it **[here](https://www.python.org/downloads/).**
+2. Download a **[Database Browser for SQLite](https://sqlitebrowser.org/dl/)**, you will need it to maintain your databases.
+3. Generate your Discord Bot Token
+4.  Set up a Lavalink server
+
 
 ### Installation
 
@@ -94,17 +97,41 @@ I developed Shuwy for my personal use, but in case you want to set up your own l
 ```sh
 git clone https://github.com/Shunya-sama/Shuwy.git
 ```
-2. Install NPM packages
+2. Set up a virtual environment
+ ```sh
+ python3.7 -m venv ShuwyPythonenv
+ ```
+3. Install dependencies
 ```sh
-npm install
+pip install -U -r requirements.txt
 ```
 
+### Configuration
 
-
+1. Add your Discord Bot Token to `\config\.env.example` file
+```sh
+DISCORD_TOKEN=YOUR TOKEN HERE
+```
+2. Rename `\config\.env.example` to `\config\.env` 
+3. Open `\config\lavalink.bat` and correct the path to `Lavalink.jar`
+```sh
+java -jar "PATH-TO-YOUR-Lavalink.jar"
+```
+5. Open `\config\run.bat` and correct the  following paths.
+```sh
+"PATH-TO-YOUR-BOT\ShuwyPythonenv\Scripts\python.exe" "PATH-TO-YOUR-BOT\Shuwy.py" %*
+```
 <!-- USAGE EXAMPLES -->
 ## Usage
-*IN CONSTRUCTION*
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+The tools that I supply together with Shuwy are made of my own accord to ease the workflow. The functionalities of the bot are pretty standard and everyone is welcome to add or suggest more of them.
+
+### Launch
+
+To start the bot, simply navigate to the \config folder and launch the executable run.bat. This is a *BATCH* file that I developed to make it easier to start the bot and monitor its activity, the syntax of this *BATCH* file makes it restricted uniquely to *Windows 10*, if you are using some other *OS*, just run the `Shuwy.py` file or use this command line:
+```sh
+"PATH-TO-YOUR-BOT\ShuwyPythonenv\Scripts\python.exe" "PATH-TO-YOUR-BOT\Shuwy.py" %*
+```
+### Functionalities
 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
@@ -112,14 +139,13 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 <!-- ROADMAP -->
 ## Roadmap
-*IN CONSTRUCTION*
+
 See the [open issues](https://github.com/Shunya-sama/Shuwy/issues) for a list of proposed features (and known issues).
 
 
 
 <!-- CONTRIBUTING -->
 ## Contributing
-*IN CONSTRUCTION*
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
@@ -149,9 +175,8 @@ Project Link: [https://github.com/Shunya-sama/Shuwy](https://github.com/Shunya-s
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
-* []()
-* []()
-* []()
+* [Rapptz](https://github.com/Rapptz) for developing discord.py
+* [Pythonista Guild](https://github.com/PythonistaGuild) for their work with Wavelink
 
 
 
@@ -159,7 +184,7 @@ Project Link: [https://github.com/Shunya-sama/Shuwy](https://github.com/Shunya-s
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[shuwy-shield]: https://img.shields.io/badge/shuwy-v0.2.3-blue.svg
+[shuwy-shield]: https://img.shields.io/badge/shuwy-v0.2.4-blue.svg
 [shuwy-url]: https://github.com/Shunya-sama/Shuwy
 [contributors-shield]: https://img.shields.io/github/contributors/Shunya-sama/Shuwy.svg
 [contributors-url]: https://github.com/Shunya-sama/Shuwy/graphs/contributors
