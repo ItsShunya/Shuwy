@@ -25,7 +25,7 @@ if sys.version_info[1] < 6 or sys.version_info[0] < 3:
 dotenv_path = os.path.join(f'{os.path.dirname(sys.argv[0])}/config', '.env')
 load_dotenv(dotenv_path)
 token = os.getenv('DISCORD_TOKEN')
-version = os.getenv('VERSION')
+version = os.getenv('APP_VERSION')
 
 @contextlib.contextmanager # No need to define __enter__() and __exit__() methods.
 def logger():
