@@ -1,5 +1,5 @@
 @echo off
 
-java -jar "D:\Projects\discord.py bot\ShunyaBOT\ShunyaBOT\config\Lavalink.jar"
+java -jar "D:\Projects\Shuwy Discord Bot\Shuwy\Shuwy\config\Lavalink.jar"
 
 pause
