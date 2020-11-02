@@ -28,29 +28,29 @@ echo          /___________/                                      \__________\
 echo --------------------------------------------------------------------------------
 echo. 
 echo.
-  
-echo Welcome to the Shuwy bot start-up program.
-timeout /t 2 /nobreak > NUL
-echo Press any key if you wish to start Shuwy Bot.
+
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Welcome to the Shuwy bot start-up program.
+timeout /t 1 /nobreak > NUL
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Press any key if you wish to start Shuwy Bot.
 timeout 15 > NUL
-echo Please, wait while the bot starts.
-timeout /t 2 /nobreak > NUL
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Please, wait while the bot starts.
+timeout /t 1 /nobreak > NUL
 echo --------------------------------------------------------------------------------
-timeout /t 2 /nobreak > NUL
-echo Setting up the Lavalink server...
-timeout /t 2 /nobreak > NUL
+timeout /t 1 /nobreak > NUL
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Setting up the Lavalink server...
+timeout /t 1 /nobreak > NUL
 ::start "TEST" cmd.exe /k TITLE TEST & color 02 & mode con: cols=160 lines=78
 start cmd /k "title "Shuwy's Lavalink Server"  & color 05 & call lavalink.bat"
 
 timeout /t 7 /nobreak > NUL
-echo Lavalink server has been started, please check above if there were any errors.
-timeout /t 2 /nobreak > NUL
-echo Shuwy Bot will start now, if errors were encountered in the Lavalink server initialization then Music commands will not be available.
-timeout /t 2 /nobreak > NUL
-echo Setting up Shuwy Bot...
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Lavalink server has been started, please check above if there were any errors.
+timeout /t 1 /nobreak > NUL
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Shuwy Bot will start now, if errors were encountered in the Lavalink server initialization then Music commands will not be available.
+timeout /t 1 /nobreak > NUL
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Setting up Shuwy Bot...
 cd /D "%~dp0"
 cd ..
-"D:\Projects\discord.py bot\ShunyaBOT\ShunyaBOT\ShunyaBOTenv2\Scripts\python.exe" "D:\Projects\discord.py bot\ShunyaBOT\ShunyaBOT\ShunyaBOT.py" %*
+"D:\Projects\Shuwy Discord Bot\Shuwy\Shuwy\ShuwyPythonenv\Scripts\python.exe" "D:\Projects\Shuwy Discord Bot\Shuwy\Shuwy\Shuwy.py" %*
 pause
-echo Shuwy Bot has been started!
+echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Shuwy Bot has been started!
 pause >nul
