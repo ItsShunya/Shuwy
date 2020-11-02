@@ -1,5 +1,13 @@
-# discord.py and Wavelink requirements
+# Bot requirements
+discord.py>=1.5.1		# Necessary due to the use of intents starting on October 7th
+wavelink>=0.9.6
+
+# Wavelink and discord.py requirement
 aiohttp>=3.6.0,<3.7.0
 
-# Necessary due to the use of intents starting on October 7th
-discord.py>=1.5.1
+# Data Management
+aiosqlite>=0.15.0
+python-dotenv>=0.14.0
+
+# Visual discord menus
+discord-ext-menus>=1.0.0-a
