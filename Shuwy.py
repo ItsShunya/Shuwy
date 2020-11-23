@@ -117,8 +117,7 @@ async def on_guild_join(guild):
     embed.add_field(name='!welcome <text>', value='`-Set the welcome message`', inline=False)
     embed.add_field(name='!role_add <channel> <messageid> <emoji> <role>', value='`-Sets a role to be added to a user when he reacts to a pre-defined message with a pre-defined role.`', inline=False)
     embed.add_field(name="If you'd like some custom features, or want to report an issue please leave a comment here:", value="https://github.com/Shunya-sama/Shuwy/issues", inline=False)
-    join_message = set_style(embed)
-    return await guild.owner.send(embed = join_message)
+    return await guild.owner.send(embed = set_style(embed))
 
 @bot.event
 async def on_guild_remove(guild):
