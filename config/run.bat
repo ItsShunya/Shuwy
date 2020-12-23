@@ -50,7 +50,7 @@ timeout /t 1 /nobreak > NUL
 echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Setting up Shuwy Bot...
 cd /D "%~dp0"
 cd ..
-"D:\Projects\Shuwy Discord Bot\Shuwy\Shuwy\ShuwyPythonenv\Scripts\python.exe" "D:\Projects\Shuwy Discord Bot\Shuwy\Shuwy\Shuwy.py" %*
+pipenv run python "D:\Projects\Shuwy Discord Bot\Shuwy\Shuwy\Shuwy.py"
 pause
 echo %date:~-4%-%date:~3,2%-%date:~0,2% %time:~0,2%:%time:~3,2%:%time:~6,2%.%time:~9,3% Shuwy Bot has been started!
 pause >nul
