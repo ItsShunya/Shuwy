@@ -134,7 +134,8 @@ class MembersCog(commands.Cog, name='Members'):
     async def on_member_join(self, member):
         '''Event that takes places when a user joins a guild.
            Here we will read the database and assign the member the necessary settings. '''
-
+        database = await db_connect()
+        cursor = await database.cursor()
         guild = member.guild
         result0 = await get_welcome_channel_switch(member.guild.id)
         if result0[0] == 1:

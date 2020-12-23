@@ -10,4 +10,4 @@ aiosqlite>=0.15.0
 python-dotenv>=0.14.0
 
 # Visual discord menus
-discord-ext-menus>=1.0.0-a
+#git+https://github.com/Rapptz/discord-ext-menus.git@master#egg=discord-ext-menus
