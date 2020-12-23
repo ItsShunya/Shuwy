@@ -137,7 +137,7 @@ class MembersCog(commands.Cog, name='Members'):
 
         guild = member.guild
         result0 = await get_welcome_channel_switch(member.guild.id)
-        if result0[0] is 1:
+        if result0[0] == 1:
             result = await get_welcome_channel_id(member.guild.id)
             if result[0] is None:
                 if guild.system_channel is not None:
@@ -162,7 +162,7 @@ class MembersCog(commands.Cog, name='Members'):
                 else:
                     await channel.send(embed=embed_welcome(str(result1[0]), member))
         result2 = await get_welcome_role_switch(member.guild.id)
-        if result2[0] is 1:
+        if result2[0] == 1:
             result3 = await get_welcome_role_id(member.guild.id)
             if result3[0] is None:
                 role_Name = 'New Member'

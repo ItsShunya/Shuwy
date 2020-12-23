@@ -648,7 +648,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         database = await db_connect()
         cursor = await database.cursor()
         await cursor.execute(f"SELECT EXISTS(SELECT 1 FROM music WHERE member_id = {member.id})")
-        if cursor.fetchone()[0] is 1:
+        if cursor.fetchone()[0] == 1:
             # Check if the favourite list is full
             await cursor.execute(f"SELECT favourite10 FROM music WHERE member_id = {member.id}")
             if await cursor.fetchone()[0] is not None:
