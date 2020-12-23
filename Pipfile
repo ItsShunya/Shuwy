@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"discord.py" = ">=1.5.1"
+wavelink = ">=0.9.6"
+aiohttp = ">=3.6.0,<3.7.0"
+aiosqlite = ">=0.15.0"
+python-dotenv = ">=0.14.0"
+discord-ext-menus = {editable = true, ref = "master", git = "https://github.com/Rapptz/discord-ext-menus"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
