@@ -6,11 +6,10 @@ import os
 def embed_welcome(message, member):
     '''Sets the embed message specifically for welcome messages.'''
 
-    guild = member.guild
+    guild = member.guild.name
     user = member.name
-    mention = member.mention
     members = len(list(member.guild.members))
-    embed = discord.Embed(color=discord.Colour.purple(), description=message.format(members=members, mention=mention, user=user, guild=guild))
+    embed = discord.Embed(color=discord.Colour.purple(), description=message.format(members=members, user=user, guild=guild))
     embed.set_thumbnail(url=f'{member.avatar_url}')
     embed.set_author(name=f'{member.name}', icon_url=f'{member.avatar_url}')
     return set_style(embed)
