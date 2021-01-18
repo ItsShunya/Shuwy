@@ -72,7 +72,7 @@ class MembersCog(commands.Cog, name='Members'):
         Keyword arguments:
         channel -- channel to be used for welcome messages'''
 
-        await set_welcome_channel(channel.id, ctx.guild.id)
+        await set_welcome_text(channel.id, ctx.guild.id)
         embed = discord.Embed(color=discord.Colour.purple(), description=f'Welcome Channel has been set to {channel.mention}')
         return await ctx.send(embed=set_style(embed))
  
