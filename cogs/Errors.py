@@ -53,7 +53,11 @@ class ErrorCog(commands.Cog, name='Error'):
                     return await ctx.author.send(message)
                 except discord.Forbidden:
                     return
-
+        
+        # Hierarchy error: bot's role is lower than the one trying to edit/give
+        elif isinstance(error, discord.Forbidden):
+            return await ctx.send(embed=embed_error(f'The role you are trying to manage has higher hierarchy than the bot\'s role. '
+                                                    f'Contact the admin of the server to solve this issue.', input1=ctx))
         # User lacks permissions.
         elif isinstance(error, commands.MissingPermissions):
             permissions = '\n'.join([f'> {permission}' for permission in error.missing_perms])
@@ -76,12 +80,12 @@ class ErrorCog(commands.Cog, name='Error'):
 
         # Command only for servers.
         elif isinstance(error, commands.NoPrivateMessage):
-            return await ctx.send(embed=embed_error(f'The command `{ctx.command}` is not avaiable in private messages. '
+            return await ctx.send(embed=embed_error(f'The command `{ctx.command}` is not available in private messages. '
                                                     f'Use `{ctx.prefix}help {ctx.command}` for more information on how to use it.', input1=ctx))
 
         # Command only for owners.
         elif isinstance(error, commands.NotOwner):
-            return await ctx.send(embed=embed_error(f'The command `{ctx.command}` is only avaiable for developer/owner. ', input1=ctx))
+            return await ctx.send(embed=embed_error(f'The command `{ctx.command}` is only available for developer/owner. ', input1=ctx))
 
         #If it is a non-handled error we will pass the error message obtained.
         else:
