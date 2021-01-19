@@ -96,6 +96,22 @@ class ModerationCog(commands.Cog, name='Moderation'):
         embed.add_field(name='Bot?', value=member.bot)
         await ctx.send(embed=set_style(embed))
 
+    @commands.has_permissions(manage_roles=True)
+    @commands.command()
+    async def addroles(self, ctx, user: discord.Member, *role: discord.Role):
+        '''Gives the user a role passed as paramter.
+
+        Keyword arguments:
+        user -- user that will receive the role
+        role -- role to be given'''
+
+        for arg in role:
+            await user.add_roles(arg)
+
+        roles = ''.join(f'`{rol}` ' for rol in role)
+        embed = discord.Embed(description=f'The user {user.name} now has the following roles: {roles}', color=discord.Colour.purple())  
+        await ctx.send(embed=set_style(embed))
+
     async def cog_check(self, ctx: commands.Context):
         '''Cog wide check, which disallows commands in DMs.'''
 
