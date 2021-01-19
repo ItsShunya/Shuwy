@@ -305,7 +305,7 @@ class InteractiveController(menus.Menu):
         await self.bot.invoke(ctx)
         await self.message.remove_reaction(str(payload.emoji), ctx.author)  # Remove the reaction 
 
-class PaginatorSource(menus.ListPageSource):
+class PaginatorQueue(menus.ListPageSource):
     '''Player queue paginator class.'''
 
     def __init__(self, entries, *, per_page=8):
@@ -321,6 +321,21 @@ class PaginatorSource(menus.ListPageSource):
         # We always want to embed even on 1 page of results...
         return True
 
+class PaginatorFavourite(menus.ListPageSource):
+    '''Player favourites paginator class.'''
+
+    def __init__(self, entries, *, per_page=5):
+        super().__init__(entries, per_page=per_page)
+
+    async def format_page(self, menu: menus.Menu, page):
+        embed = discord.Embed(title='Your favourites', colour=discord.Colour.purple())
+        embed.description = '\n'.join(f'`{index}. {title}`' for index, title in enumerate(page, 1))
+
+        return embed
+
+    def is_paginating(self):
+        # We always want to embed even on 1 page of results...
+        return True
 
 class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
     '''Music Cog.'''
@@ -648,10 +663,12 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         database = await db_connect()
         cursor = await database.cursor()
         await cursor.execute(f"SELECT EXISTS(SELECT 1 FROM music WHERE member_id = {member.id})")
-        if cursor.fetchone()[0] == 1:
+        fav = await cursor.fetchone()
+        if fav[0] == 1:
             # Check if the favourite list is full
             await cursor.execute(f"SELECT favourite10 FROM music WHERE member_id = {member.id}")
-            if await cursor.fetchone()[0] is not None:
+            fav2 = await cursor.fetchone()
+            if fav2[0] is not None:
                 embed = discord.Embed(description='You have already reached the maximum number of favourites, please delete some before adding more.', color=discord.Colour.purple()) 
                 return await ctx.send(embed=set_style(embed))
             found = False
@@ -660,7 +677,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             while (found == False and number <= 10 ):
                 string = favourite + str(number)
                 await cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
-                result = cursor.fetchone()[0]
+                result = await cursor.fetchone()
+                result = result[0]
                 if result is None:
                     sql = (f"UPDATE music SET {string} = ? WHERE member_id = ?")
                     val = (track.uri, member.id)
@@ -704,7 +722,8 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         while (last == False and number <= 10):
             string = "favourite" + str(number)
             await cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
-            url = await cursor.fetchone()[0]
+            url = await cursor.fetchone()
+            url = url[0]
             if url is None:
                 last = True
             else:
@@ -727,10 +746,12 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
         last = False
         number = 1
         entries = []
+
         while (last == False and number <= 10):
             string = "favourite" + str(number)
             await cursor.execute(f"SELECT {string} FROM music WHERE member_id = {member.id}")
-            url = cursor.fetchone()[0]
+            url = await cursor.fetchone()
+            url = url[0]
             if url is None:
                 last = True
             else:
@@ -739,7 +760,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
                 entries.append(track)
             number += 1
         titles = [track.title for track in entries]
-        pages = PaginatorSource(entries=entries)
+        pages = PaginatorFavourite(entries=entries)
         paginator = menus.MenuPages(source=pages, timeout=None, delete_message_after=True)
         await paginator.start(ctx)
 
@@ -899,7 +920,7 @@ class MusicCog(commands.Cog, wavelink.WavelinkMixin, name='Music'):
             return await ctx.send(embed=set_style(embed), delete_after=8)
 
         entries = [track.title for track in player.queue._queue]
-        pages = PaginatorSource(entries=entries)
+        pages = PaginatorQueue(entries=entries)
         paginator = menus.MenuPages(source=pages, timeout=None, delete_message_after=True)
 
         await paginator.start(ctx)
